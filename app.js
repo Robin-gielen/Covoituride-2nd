@@ -1,8 +1,8 @@
-
 //Module dependencies
-var express = require('express')
-, stylus = require('stylus')
-, nib = require('nib');
+var express = require('express');
+var stylus = require('stylus');
+var nib = require('nib');
+var logger = require('express-logger');
 
 //Mongodb dependencies
 var MongoClient = require('mongodb').MongoClient
@@ -38,7 +38,8 @@ db.once('open', function() {
 
 app.set('views', __dirname + '/views')
 app.set('view engine', 'pug')
-app.use(express.logger('dev'))
+app.use(logger({path: "event.log"}));
+
 app.use(express.static(__dirname + '/public'))
 
 // Configuring Passport
