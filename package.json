@@ -17,5 +17,8 @@
     "pug": "^0.1.0",
     "req-flash": "*",
     "stylus": "^0.54.5"
+  },
+  "devDependencies": {
+    "nodemon": "^1.10.0"
   }
 }
