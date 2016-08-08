@@ -141,10 +141,10 @@ app.get('/aboutCovoituride.html', function (req, res) {
   res.render('aboutCovoituride.pug')
 })
 app.get('/homeLogged.html', function (req, res) {
-  res.render('homeLogged.pug')
+  res.render('home.pug', { logged_in: true})
 })
 app.get('/homeUnlogged.html', function (req, res) {
-  res.render('homeUnlogged.pug')
+  res.render('home.pug', { logged_in: false})
 })
 app.get('/login.html', function (req, res) {
   res.render('login.pug')

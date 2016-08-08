@@ -1,4 +1,3 @@
-doctype html
 extends layout.pug
 
 block title
@@ -6,22 +5,30 @@ block title
 
 block content
     .topBloc
-      a.a1(href='homeUnlogged.html') Home
+      a.a1(href='homeLogged.html') Home
       a.a2(href='searchRides.html') Search for a Ride
-      a.a3(href='logout.html') Log Out
+    
+      if logged_in
+        a.a3(href='logout.html') Log Out
+      else
+        a.a3(href='signup.html') SignUp
+        a.a4(href='login.html') Login
+    
     .leftBloc
       form(action='#')
         p Quick searche by town :
         input(style='width:80%; margin-left:5px; margin-bottom:3px;', type='text', name='search')
         input(style='margin-left:5px;', type='submit', value='search')
-      a(href='myProfile.html', style='color:white; text-decoration:none;')
-        p My profile
-      a(href='proposeARide.html', style='color:white; text-decoration:none;')
-        p ProposeARide
-      a(href='proposedRides.html', style='color:white; text-decoration:none;')
-        p My proposed rides
-      a(href='subscribedRides.html', style='color:white; text-decoration:none;')
-        p My subscribed rides
+      
+      if logged_in
+        a(href='myProfile.html', style='color:white; text-decoration:none;')
+          p My profile
+        a(href='proposeARide.html', style='color:white; text-decoration:none;')
+          p ProposeARide
+        a(href='proposedRides.html', style='color:white; text-decoration:none;')
+          p My proposed rides
+        a(href='subscribedRides.html', style='color:white; text-decoration:none;')
+          p My subscribed rides
       a(href='searchRides.html', style='color:white; text-decoration:none;')
         p Search for rides
       a(href='searchRiders.html', style='color:white; text-decoration:none;')
