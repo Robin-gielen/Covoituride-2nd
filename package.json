@@ -19,6 +19,7 @@
     "stylus": "^0.54.5"
   },
   "devDependencies": {
+    "jshint": "^2.9.2",
     "nodemon": "^1.10.0"
   }
 }
