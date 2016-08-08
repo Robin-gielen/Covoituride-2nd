@@ -1,0 +1,36 @@
+doctype html
+html
+  head
+    title searchRiders
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body
+    .title
+      p
+        br
+        | Covoituride
+        br
+    .topBloc
+      a.a1(href='homeUnlogged.html') Home
+      a.a2(href='searchRides.html') Search for a Ride
+      a.a4(href='logout.html') Logout
+    .leftBloc
+      form(action='#')
+        p Quick searche by town :
+        input(style='width:80%; margin-left:5px; margin-bottom:3px;', type='text', name='search')
+        input(style='margin-left:5px;', type='submit', value='search')
+      a(href='myProfile.html', style='color:white; text-decoration:none;')
+        p My profile
+      a(href='proposedRides.html', style='color:white; text-decoration:none;')
+        p My proposed rides
+      a(href='subscribedRides.html', style='color:white; text-decoration:none;')
+        p My subscribed rides
+      a(href='searchRides.html', style='color:white; text-decoration:none;')
+        p Search for rides
+      a(href='searchRiders.html', style='color:white; text-decoration:none;')
+        p Search for riders
+      a(href='aboutCovoituride.html', style='color:white; text-decoration:none;')
+        p About covoituride
+    .bodyBloc
+      p Covoituride est un outil en ligne d&apos;aide a la recherche de covoiturage.
+      p Les utilisateurs inscrits peuvent rechercher et proposer des trajets aux autres utilisateurs.
+      p Covoituride a ete developpe par un etudiant de l&apos;UCL dans le cadre d&apos;un projet.

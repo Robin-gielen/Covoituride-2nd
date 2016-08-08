@@ -1,0 +1,25 @@
+doctype html
+html
+  head
+    title myProfile
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body
+    .title
+      p
+        br
+        | Covoituride
+        br
+    .topBloc
+      a.a1(href='homeUnlogged.html') Home
+      a.a2(href='searchRides.html') Search for a Ride
+      a.a3(href='signup.html') SignUp
+    .unsplit_bodyBloc
+      form(action='/login.html', method='post')
+        div(style='padding-top:40px; padding-bottom:5px;')
+          label Username:
+          input(type='text', name='username')
+        div(style='padding-bottom:5px;')
+          label Password :
+          input(type='password', name='password')
+        div(style='padding-bottom:5px;')
+          input(type='submit', value='Log In')
