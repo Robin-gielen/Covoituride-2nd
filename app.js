@@ -16,18 +16,9 @@ var utilisateur = require('./models/users');
 var passport = require('passport');
 var Strategy = require('passport-local');
 var expressSession = require('express-session');
-var flash        = require('req-flash');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/covoituride';
+var flash = require('req-flash');
 
 var app = express()
-
-/*// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected succesfully to database - First time");
-});*/
 
 mongoose.connect('mongodb://localhost/db');
 var db = mongoose.connection;

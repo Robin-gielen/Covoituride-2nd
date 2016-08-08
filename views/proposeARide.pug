@@ -1,15 +1,9 @@
-doctype html
-html
-  head
-    title proposeARide
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    .title
-      p
-        br
-        | Covoituride
-        br
-    .topBloc
+extends layout.pug
+
+block title
+  title Propose a ride
+
+block content
       a.a1(href='homeUnlogged.html') Home
       a.a2(href='searchRides.html') Search for a Ride
       a.a3(href='logout.html') Log Out

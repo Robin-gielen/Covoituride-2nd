@@ -1,14 +1,10 @@
 doctype html
-html
-  head
-    title homeLogged
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    .title
-      p
-        br
-        | Covoituride LOGGED
-        br
+extends layout.pug
+
+block title
+  title Covoituride LOGGED
+
+block content
     .topBloc
       a.a1(href='homeUnlogged.html') Home
       a.a2(href='searchRides.html') Search for a Ride
