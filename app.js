@@ -44,10 +44,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-// parse application/x-www-form-urlencoded 
+// parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
- 
+
 //Passport express-session configuration
 //app.use(app.router);
 
@@ -194,11 +194,13 @@ app.post('/login.html', function (req, res, next) {
       }
       else {
         console.log('password inccorect, try again !')
-        res.render('login.pug', { logged_in: false})
+        res.render('login.pug', {error: 'Incorect password'})
+
       }
     }
     else {
       console.log('User not foud, try again with your correct username or subscribe !');
+      res.render('login.pug', {error: 'Username not existing'})
     }
   })
 })
