@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 
 
 // user schema
-var Ride = new Schema({
+var rideSchema = new Schema({
   departure: {
     type: String,   //url of the video
   },
@@ -38,7 +38,7 @@ var Ride = new Schema({
 });
 
 // on every save, add the date
-userSchema.pre('save', function(next) {
+rideSchema.pre('save', function(next) {
   // get the current date
   var currentDate = new Date();
 
@@ -48,8 +48,8 @@ userSchema.pre('save', function(next) {
   // if created_at doesn't exist, add to that field
   if (!this.created_at)
     this.created_at = currentDate;
-    
+
   next();
 });
 
-module.exports = mongoose.model('Video', VideoSchema);
+module.exports = mongoose.model('Ride', rideSchema);

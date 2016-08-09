@@ -1,7 +1,6 @@
 //Module dependencies
 var express = require('express');
-var stylus = require('stylus');
-var nib = require('nib');
+
 var logger = require('express-logger');
 
 //Mongodb dependencies
@@ -9,17 +8,20 @@ var MongoClient = require('mongodb')
 , assert = require('assert')
 , mongoose = require('mongoose')
 , url = 'mongodb://localhost:27017/db'
-, bodyParser = require('body-parser');
+, bodyParser = require('body-parser')
+, cookieParser = require('cookie-parser');
+
 mongoose.Promise = require('bluebird');
+
 //Import mongoose models
 var utilisateur = require('./models/users');
+var trajet = require('./models/ride');
 
 //Passport dependencies
 var passport = require('passport');
 var Strategy = require('passport-local');
 var session = require('express-session');
 var flash = require('req-flash');
-
 var app = express()
 
 //Lauching mongodb connection
@@ -30,22 +32,26 @@ db.once('open', function() {
   console.log('CONNECTED');
 });
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(bodyParser());
-
+//Views configuration
 app.set('views', __dirname + '/views')
 app.set('view engine', 'pug')
 app.use(logger({path: "event.log"}));
-
 app.use(express.static(__dirname + '/public'))
 
 // Configuring Passport
-app.use(session({secret: 'supernova', saveUninitialized: true, resave: true}));
+app.use(session({secret: 'supernova'}));//, saveUninitialized: true, resave: true}));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
+//Body-Parser
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(bodyParser());
+app.use(cookieParser());
+ 
+//Passport express-session configuration
+//app.use(app.router);
 
 // passport/login.js
 passport.use('login', new Strategy({
@@ -78,7 +84,7 @@ passport.use('login', new Strategy({
 /*passport.authenticate('signup', {
   successRedirect: '/homeLogged.html',
   failureRedirect: '/homeUnlogged.html'
-  }) (req, res, next); // appelle de la fonction retournée par passport.authenticate('signup' (req, res, next))*/
+})*/
 // passport/signup.js
 passport.use('signup', new Strategy({
     passReqToCallback : true },
@@ -139,7 +145,6 @@ app.get('/homeUnlogged.html', function (req, res) {
 app.get('/signup.html', function (req, res) {
   res.render('signup.pug')
 })
-
 
 app.post('/signup.html', function (req, res, next) {
   console.log('In signup function');
@@ -204,9 +209,15 @@ app.get('/logout.html', function (req, res) {
   res.render('home.pug', { logged_in: false})
 })
 
-/*app.use('connected', function (req, res) {
-  passport.connected=true
-})*/
+app.use(function loggedIn(req, res, next) {
+    if (req.user) {
+      tempName = req.user;
+        next();
+    } else {
+        console.log('Must be logged in to acces this part of the site !');
+        res.redirect('/homeUnlogged.html');
+    }
+});
 
 app.get('/homeLogged.html', function (req, res) {
   res.render('home.pug', { logged_in: true})
