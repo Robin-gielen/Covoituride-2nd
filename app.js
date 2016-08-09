@@ -8,8 +8,7 @@ var MongoClient = require('mongodb')
 , assert = require('assert')
 , mongoose = require('mongoose')
 , url = 'mongodb://localhost:27017/db'
-, bodyParser = require('body-parser')
-, cookieParser = require('cookie-parser');
+, bodyParser = require('body-parser');
 
 mongoose.Promise = require('bluebird');
 
@@ -46,7 +45,6 @@ app.use(flash());
 
 // parse application/x-www-form-urlencoded 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
  
 //Passport express-session configuration
 //app.use(app.router);
