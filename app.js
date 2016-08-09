@@ -8,8 +8,7 @@ var MongoClient = require('mongodb')
 , assert = require('assert')
 , mongoose = require('mongoose')
 , url = 'mongodb://localhost:27017/db'
-, bodyParser = require('body-parser')
-, cookieParser = require('cookie-parser');
+, bodyParser = require('body-parser');
 
 mongoose.Promise = require('bluebird');
 
@@ -39,17 +38,21 @@ app.use(logger({path: "event.log"}));
 app.use(express.static(__dirname + '/public'))
 
 // Configuring Passport
-app.use(session({secret: 'supernova'}));//, saveUninitialized: true, resave: true}));
+app.use(session({secret: 'supernova',
+	saveUninitialized: false,
+	resave: false
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
+<<<<<<< HEAD
 app.use(cookieParser());
 
-//Passport express-session configuration
-//app.use(app.router);
+=======
+
 
 // passport/login.js
 passport.use('login', new Strategy({

@@ -18,3 +18,5 @@ block content
           input(type='password', name='password')
         div(style='padding-bottom:5px;')
           input(type='submit', value='Log In')
+        if error
+          div= error
