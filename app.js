@@ -48,10 +48,6 @@ app.use(flash());
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
-<<<<<<< HEAD
-app.use(cookieParser());
-
-=======
 
 
 // passport/login.js
