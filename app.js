@@ -44,10 +44,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 
-//Body-Parser
+// parse application/x-www-form-urlencoded 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(bodyParser());
 app.use(cookieParser());
  
 //Passport express-session configuration
