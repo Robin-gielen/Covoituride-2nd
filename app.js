@@ -139,18 +139,12 @@ app.get('/homeUnlogged.html', function (req, res) {
 app.get('/signup.html', function (req, res) {
   res.render('signup.pug')
 })
-app.post('/signup.html', function (req, res) {
-  passport.authenticate('signup', {
-    successRedirect: '/homeLogged.html',
-    failureRedirect: '/homeUnlogged.html'
-    }) (req, res, next);
-})
-/*
+
+
 app.post('/signup.html', function (req, res, next) {
   console.log('In signup function');
   utilisateur.find({ username: req.body.username }, function(err, user) {
     if (err) throw err;
-    console.log('from db' + user);
     if (user[0] != undefined) {
       if (user[0].toObject().username == req.body.username) {
         console.log('Username already exists in database')
@@ -159,7 +153,6 @@ app.post('/signup.html', function (req, res, next) {
       else {}
     }
     else {
-      console.log('In signup function - ELSE NUMERO 2');
       var newUser = new utilisateur({
       // set the user's local credentials
       username : req.body.username,
@@ -182,7 +175,7 @@ app.post('/signup.html', function (req, res, next) {
     }
   })
 });
-*/
+
 app.get('/login.html', function (req, res) {
   res.render('login.pug')
 })
