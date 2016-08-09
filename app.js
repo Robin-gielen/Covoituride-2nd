@@ -151,7 +151,7 @@ app.post('/signup.html', function (req, res, next) {
     if (user[0] != undefined) {
       if (user[0].toObject().username == req.body.username) {
         console.log('Username already exists in database')
-        res.render('signup.pug')
+        res.render('signup.pug', {error: 'Username already exists'})
       }
       else {}
     }
