@@ -39,8 +39,8 @@ app.use(express.static(__dirname + '/public'))
 
 // Configuring Passport
 app.use(session({secret: 'supernova',
-	saveUninitialized: true, 
-	resave: true
+	saveUninitialized: false, 
+	resave: false
 }));
 app.use(passport.initialize());
 app.use(passport.session());
