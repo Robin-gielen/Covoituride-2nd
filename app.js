@@ -4,11 +4,10 @@ var express = require('express');
 var logger = require('express-logger');
 
 //Mongodb dependencies
-var MongoClient = require('mongodb')
-, assert = require('assert')
-, mongoose = require('mongoose')
-, url = 'mongodb://localhost:27017/db'
-, bodyParser = require('body-parser');
+var MongoClient = require('mongodb');
+var assert = require('assert');
+var mongoose = require('mongoose');
+var bodyParser = require('body-parser');
 
 mongoose.Promise = require('bluebird');
 
@@ -21,15 +20,16 @@ var passport = require('passport');
 var Strategy = require('passport-local');
 var session = require('express-session');
 var flash = require('req-flash');
-var app = express()
+var app = express();
 
-  //Lauching mongodb connection
-  mongoose.connect(url);
-  var db = mongoose.connection;
-  db.on('error', console.error.bind(console, 'connection error:'));
-  db.once('open', function() {
-    console.log('CONNECTED');
-  });
+//Lauching mongodb connection
+var url = 'mongodb://localhost:27017/db';
+mongoose.connect(url);
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function() {
+  console.log('CONNECTED');
+});
 
 //Views configuration
 app.set('views', __dirname + '/views')
