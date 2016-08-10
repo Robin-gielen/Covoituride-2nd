@@ -7,7 +7,7 @@ var rideSchema = new Schema({
   departure: {
     type: String,   //url of the video
   },
-  takeOff: {
+  pickUpPlace: {
     type: String,
     required: true,
   },

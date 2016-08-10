@@ -21,6 +21,8 @@ var passport = require('passport');
 var Strategy = require('passport-local');
 var session = require('express-session');
 var flash = require('req-flash');
+var connectFlash = require('connect-flash');
+
 var app = express()
 
 //Lauching mongodb connection
@@ -49,87 +51,84 @@ app.use(flash());
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 
+// Passport serialization
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
 
 // passport/login.js
 passport.use('login', new Strategy({
   passReqToCallback : true },
   function(req, username, password, done) {
-  // check in mongo if a user with username exists or not
-  utilisateur.findOne({ 'username' :  username },
-  function(err, user) {
-    // In case of any error, return using the done method
-    if (err)
-    return done(err);
-    // Username does not exist, log error & redirect back
-    if (!user){
-      console.log('User Not Found with username '+username);
-      return done(null, false,
-        req.flash('message', 'User Not found.'));
+    utilisateur.find({ username: req.body.username }, function(err, user) {
+      //if there's an error with the reading of the db
+      if (err)
+        return done(err);
+      console.log('from db' + user)
+      // if no user with that username is Found
+      if(user[0] == undefined) {
+        console.log('No user with that username found')
+        return done(null, false, req.flash('loginMessage','No user found.'));
       }
-      // User exists but wrong password, log the error
-      if (!isValidPassword(user, password)){
-        console.log('Invalid Password');
-        return done(null, false,
-          req.flash('message', 'Invalid Password'));
-        }
-        // User and password both match, return user from
-        // done method which will be treated like success
-        return done(null, user);
+      //User found but wrong password
+      else  if(user[0].toObject().password != req.body.password) {
+          console.log('Wrong Password')
+          return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
       }
-    );
-  }));
-/*passport.authenticate('signup', {
-  successRedirect: '/homeLogged.html',
-  failureRedirect: '/homeUnlogged.html'
-})*/
+      //Everything is ok - return user connected
+      console.log('Everything ok - connected')
+      return done(null, user);
+    });
+  }
+));
+
 // passport/signup.js
 passport.use('signup', new Strategy({
     passReqToCallback : true },
-  function(req, username, password, done) {
-    console.log('dedans de la fonction');
-    findOrCreateUser = function(){
-      // find a user in Mongo with provided username
-      utilisateur.find({'username':username},function(err, user) {
-        // In case of any error return
-        if (err){
-          console.log('Error in SignUp: '+err);
-          return done(err);
-        }
-        // already exists
-        if (user) {
-          console.log('User already exists');
-          return done(null, false,
-            req.flash('message','User Already Exists'));
-          } else {
-            // if there is no user with that email
-            // create the user
-            var newUser = new utilisateur();
-            // set the user's local credentials
-            newUser.username = username;
-            newUser.password = createHash(password);
-            newUser.firstName = req.param('firstName');
-            newUser.lastName = req.param('lastName');
-            newUser.cityOfResidence = req.param('cityOfResidence');
-            newUser.description = req.param('description');
-
-            // save the user
-              newUser.save(function(err) {
-                if (err){
-                  console.log('Error in Saving user: '+err);
-                  throw err;
-                }
-                console.log('User Registration succesful');
-                return done(null, newUser);
-              });
-          }
-        });
-      };
-      // Delay the execution of findOrCreateUser and execute
-      // the method in the next tick of the event loop
-      process.nextTick(findOrCreateUser);
-    }
-  ));
-
+   function(req, email, password, done) {
+       // asynchronous
+       // User.findOne wont fire unless data is sent back
+       process.nextTick(function() {
+       // find a user whose username is the same as the forms username
+       // we are checking to see if the user trying to login already exists
+       utilisateur.find({ username: req.body.username }, function(err, user) {
+           // if there are any errors, return the error
+           if (err)
+               return done(err);
+           // check to see if theres already a user with that username
+           if (user[0] != undefined) {
+             console.log('That username is already taken.')
+               return done(null, false, req.flash('signupMessage', 'That username is already taken.'));
+           } else {
+               // if there is no user with that username
+               // create the user
+               var newUser = new utilisateur({
+               // set the user's local credentials
+               username : req.body.username,
+               password : req.body.password,
+               firstName : req.body.firstName,
+               lastName : req.body.lastName,
+               cityOfResidence : req.body.cityOfResidence,
+               description : req.body.description,
+               });
+               // save the user
+               newUser.save(function(err) {
+                   if (err){
+                     console.log('Error in Saving user: '+err);
+                     throw err;
+                   }
+                   console.log('User Created with ' + newUser)
+                   return done(null, newUser);
+               });
+           }
+       });
+       });
+   })
+ );
 
 app.get('/aboutCovoituride.html', function (req, res) {
   res.render('aboutCovoituride.pug')
@@ -143,78 +142,28 @@ app.get('/signup.html', function (req, res) {
   res.render('signup.pug')
 })
 
-app.post('/signup.html', function (req, res, next) {
-  console.log('In signup function');
-  utilisateur.find({ username: req.body.username }, function(err, user) {
-    if (err) throw err;
-    if (user[0] != undefined) {
-      if (user[0].toObject().username == req.body.username) {
-        console.log('Username already exists in database')
-        res.render('signup.pug', {error: 'Username already exists'})
-      }
-      else {}
-    }
-    else {
-      var newUser = new utilisateur({
-      // set the user's local credentials
-      username : req.body.username,
-      password : req.body.password,
-      firstName : req.body.firstName,
-      lastName : req.body.lastName,
-      cityOfResidence : req.body.cityOfResidence,
-      description : req.body.description,
-      });
-      console.log(newUser.username);
-      // save the user
-      newUser.save(function(err, resp) {
-        if (err){
-          console.log('Error in Saving user: '+err);
-          throw err;
-        }
-        console.log('User Registration succesful');
-      });
-      res.render('home.pug', { logged_in: false})
-    }
-  })
-});
+app.post('/signup.html', passport.authenticate('signup', {
+    successRedirect: '/login.html',
+    failureRedirect: '/subscribe.html',
+    failureFlash: true //allow flash message
+  }));
 
 app.get('/login.html', function (req, res) {
   res.render('login.pug')
 })
 
-app.post('/login.html', function (req, res, next) {
-  utilisateur.find({ username: req.body.username }, function(err, user) {
-    if (err) throw err;
-    console.log('from db' + user);
-    if (user[0] != undefined) {
-      if (user[0].toObject().password == req.body.password) {
-        console.log('Credentials ok - Welcome')
-        res.render('home.pug', { logged_in: true})
-      }
-      else {
-        console.log('password inccorect, try again !')
-        res.render('login.pug', {error: 'Incorect password'})
+app.post('/login.html', passport.authenticate('login', {
+    successRedirect: '/homeLogged.html',
+    failureRedirect: '/homeUnlogged.html',
+    failureFlash: true //allow flash message
+  }));
 
-      }
-    }
-    else {
-      console.log('User not foud, try again with your correct username or subscribe !');
-      res.render('login.pug', {error: 'Username not existing'})
-    }
-  })
-})
-
-app.get('/logout.html', function (req, res) {
-  res.render('home.pug', { logged_in: false})
-})
-
-app.use(function loggedIn(req, res, next) {
+app.use(function (req, res, next) {
     if (req.user) {
-      tempName = req.user;
-        next();
+        return next();
     } else {
         console.log('Must be logged in to acces this part of the site !');
-        res.redirect('/homeUnlogged.html');
+        res.redirect('/homeUnlogged.html')
     }
 });
 
@@ -229,6 +178,33 @@ app.get('/myProfile.html', function (req, res) {
 app.get('/proposeARide.html', function (req, res) {
   res.render('proposeARide.pug')
 })
+
+app.post('/proposeARide.html', function (req, res) {
+  console.log(req.username);
+  var newRide = new trajet({
+  // set the user's local credentials
+  departure : req.body.departure,
+  pickUpPlace : req.body.pickUpPlace,
+  midRideTakeOff : req.body.midRideTakeOff,
+  arrival : req.body.arrival,
+  carModel : req.body.carModel,
+  seatsAvailable : req.body.seatsAvailable,
+  price : req.body.price,
+  stops : req.body.stops,
+  driverUsername : req.user.username,
+  });
+  console.log(newRide);
+  // save the user
+  newRide.save(function(err, resp) {
+    if (err){
+      console.log('Error in Saving ride: '+err);
+      throw err;
+    }
+    console.log('Ride Registration succesful');
+  });
+  res.render('home.pug', { logged_in: true})
+});
+
 
 app.get('/proposedRides.html', function (req, res) {
   res.render('proposedRides.pug')
@@ -246,15 +222,9 @@ app.get('/searchRiders.html', function (req, res) {
   res.render('searchRiders.pug')
 })
 
-passport.serializeUser(function(user, done) {
-  done(null, user._id);
-});
-
-passport.deserializeUser(function(id, done) {
-  utilisateur.findById(id, function(err, user) {
-    done(err, user);
-  });
-});
-
+app.get('/logout.html', function (req, res) {
+  req.logout()
+  res.render('homeUnlogged.pug')
+})
 
 app.listen(3000)

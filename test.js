@@ -1,51 +1,61 @@
-/*
- * Module dependencies
- */
-var express = require('express')
-  , stylus = require('stylus')
-  , nib = require('nib');
-/*
- * Mongodb dependencies
- */
- var MongoClient = require('mongodb').MongoClient
-   , assert = require('assert')
-   , mongoose = require('mongoose');
-
-// Connection URL
- var url = 'mongodb://localhost:27017/covoituride';
-
-
-
-var app = express()
-
-function compile(str, path) {
-  return stylus(str)
-    .set('filename', path)
-    .use(nib())
-}
-
-app.set('views', __dirname + '/views')
-app.set('view engine', 'pug')
-app.use(express.logger('dev'))
-app.use(stylus.middleware(
-  { src: __dirname + '/public'
-  , compile: compile
-  }
-))
-app.use(express.static(__dirname + '/public'))
-
-/*// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected succesfully to server - First time");
-
-
-  db.close();
+// OLD SIGNUP STRATEGY BEFORE STRATEGY WORKED
+app.post('/signup.html', function (req, res, next) {
+  console.log('In signup function');
+  utilisateur.find({ username: req.body.username }, function(err, user) {
+    if (err) throw err;
+    if (user[0] != undefined) {
+      if (user[0].toObject().username == req.body.username) {
+        console.log('Username already exists in database')
+        res.render('signup.pug', {error: 'Username already exists'})
+      }
+      else {}
+    }
+    else {
+      var newUser = new utilisateur({
+      // set the user's local credentials
+      username : req.body.username,
+      password : req.body.password,
+      firstName : req.body.firstName,
+      lastName : req.body.lastName,
+      cityOfResidence : req.body.cityOfResidence,
+      description : req.body.description,
+      });
+      console.log(newUser.username);
+      // save the user
+      newUser.save(function(err, resp) {
+        if (err){
+          console.log('Error in Saving user: '+err);
+          throw err;
+        }
+        console.log('User Registration succesful');
+      });
+      res.render('home.pug', { logged_in: false})
+    }
+  })
 });
-});
-*/
 
-mongoose.connect('mongodb://localhost/test');
+// OLD LOGIN STRATEGY BEFORE STRATEGY WORKED
+app.post('/login.html', function (req, res, next) {
+  utilisateur.find({ username: req.body.username }, function(err, user) {
+    if (err) throw err;
+    console.log('from db' + user);
+    if (user[0] != undefined) {
+      if (user[0].toObject().password == req.body.password) {
+        console.log('Credentials ok - Welcome')
+        res.render('home.pug', { logged_in: true})
+      }
+      else {
+        console.log('password inccorect, try again !')
+        res.render('login.pug', {error: 'Incorect password'})
+
+      }
+    }
+    else {
+      console.log('User not foud, try again with your correct username or subscribe !');
+      res.render('login.pug', {error: 'Username not existing'})
+    }
+  })
+})
 
 
 // EXEMPLE DE CONNECTION ET DAJOUT !!!!!!!!!!!!!!!!!!!!!!
@@ -89,42 +99,3 @@ Kitten.find({ name: /^Fluff/ });
 
 db.close();
 //FIN DE LEXEMPLE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-app.get('/aboutCovoituride.html', function (req, res) {
-  res.render('aboutCovoituride.pug')
-})
-app.get('/homeLogged.html', function (req, res) {
-  res.render('homeLogged.pug')
-})
-app.get('/homeUnlogged.html', function (req, res) {
-  res.render('homeUnlogged.pug')
-})
-app.get('/login.html', function (req, res) {
-  res.render('login.pug')
-})
-app.get('/logout.html', function (req, res) {
-  res.render('logout.pug')
-})
-app.get('/myProfile.html', function (req, res) {
-  res.render('myProfile.pug')
-})
-app.get('/proposeARide.html', function (req, res) {
-  res.render('proposeARide.pug')
-})
-app.get('/proposedRides.html', function (req, res) {
-  res.render('proposedRides.pug')
-})
-app.get('/searchRiders.html', function (req, res) {
-  res.render('searchRiders.pug')
-})
-app.get('/searchRides.html', function (req, res) {
-  res.render('searchRides.pug')
-})
-app.get('/subscribe.html', function (req, res) {
-  res.render('subscribe.pug')
-})
-app.get('/subscribedRides.html', function (req, res) {
-  res.render('subscribedRides.pug')
-})
-app.listen(3000)

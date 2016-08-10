@@ -25,8 +25,7 @@ var userSchema = new Schema({
     required: true
   },
   cityOfResidence: {
-    type: String,
-    required: true
+    type: String
   },
   description: {
     type: String

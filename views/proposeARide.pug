@@ -4,6 +4,7 @@ block title
   title Propose a ride
 
 block content
+    .topBloc
       a.a1(href='homeUnlogged.html') Home
       a.a2(href='searchRides.html') Search for a Ride
       a.a3(href='logout.html') Log Out
@@ -27,13 +28,38 @@ block content
       a(href='aboutCovoituride.html', style='color:white; text-decoration:none;')
         p About covoituride
     .bodyBloc
-      p Page de proposition de covoiturage
-      p Ville de depart :
-      p Endroit de pick-up :
-      p Prise de covoiturage sur le chemin possible :
-      p Ville d&apos;arrivee :
-      p Type de voiture :
-      p Nombre de places disponibles :
-      p Prix estime :
-      p Arret prevu :
-      p Nom de la personne qui propose :
+      form(action='/proposeARide.html', method='post')
+        p Fill up the form in order to signup
+        div(style='padding-bottom:5px;')
+          label Pick up place :
+          input(type='text', name='pickUpPlace')
+        div(style='padding-top:40px; padding-bottom:5px;')
+        label Mid-Ride pick up:
+        select(name='midRideTakeOff')
+            option(value='Yes') Yes
+            option(value='No', selected='') No
+        div(style='padding-top:40px; padding-bottom:5px;')
+          label Arrival town:
+          input(type='text', name='arrival')
+        div(style='padding-top:40px; padding-bottom:5px;')
+          label Car Model:
+          input(type='text', name='carModel')
+        div(style='padding-top:40px; padding-bottom:5px;')
+          label Number of Seats:
+          select(name='seatsAvailable')
+            option(value='One') one
+            option(value='Two') Two
+            option(value='Three') Three
+            option(value='Four') Four
+            option(value='Five') Five
+            option(value='Six') Six
+        div(style='padding-top:40px; padding-bottom:5px;')
+          label Price:
+          input(type='text', name='price')
+        div(style='padding-top:40px; padding-bottom:5px;')
+          label Stops:
+          input(type='text', name='Stops')
+        div(style='padding-bottom:5px;')
+          input(type='submit', value='signup')
+        if error
+          div= error
