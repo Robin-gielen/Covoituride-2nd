@@ -23,13 +23,13 @@ var session = require('express-session');
 var flash = require('req-flash');
 var app = express()
 
-//Lauching mongodb connection
-mongoose.connect(url);
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  console.log('CONNECTED');
-});
+  //Lauching mongodb connection
+  mongoose.connect(url);
+  var db = mongoose.connection;
+  db.on('error', console.error.bind(console, 'connection error:'));
+  db.once('open', function() {
+    console.log('CONNECTED');
+  });
 
 //Views configuration
 app.set('views', __dirname + '/views')
@@ -39,8 +39,8 @@ app.use(express.static(__dirname + '/public'))
 
 // Configuring Passport
 app.use(session({secret: 'supernova',
-	saveUninitialized: false,
-	resave: false
+  saveUninitialized: false,
+  resave: false
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -54,37 +54,37 @@ app.use(bodyParser.urlencoded({ extended: false }));
 passport.use('login', new Strategy({
   passReqToCallback : true },
   function(req, username, password, done) {
-  // check in mongo if a user with username exists or not
-  utilisateur.findOne({ 'username' :  username },
-  function(err, user) {
-    // In case of any error, return using the done method
-    if (err)
-    return done(err);
-    // Username does not exist, log error & redirect back
-    if (!user){
-      console.log('User Not Found with username '+username);
-      return done(null, false,
-        req.flash('message', 'User Not found.'));
-      }
-      // User exists but wrong password, log the error
-      if (!isValidPassword(user, password)){
-        console.log('Invalid Password');
-        return done(null, false,
-          req.flash('message', 'Invalid Password'));
+    // check in mongo if a user with username exists or not
+    utilisateur.findOne({ 'username' :  username },
+        function(err, user) {
+          // In case of any error, return using the done method
+          if (err)
+            return done(err);
+          // Username does not exist, log error & redirect back
+          if (!user){
+            console.log('User Not Found with username '+username);
+            return done(null, false,
+                req.flash('message', 'User Not found.'));
+          }
+          // User exists but wrong password, log the error
+          if (!isValidPassword(user, password)){
+            console.log('Invalid Password');
+            return done(null, false,
+                req.flash('message', 'Invalid Password'));
+          }
+          // User and password both match, return user from
+          // done method which will be treated like success
+          return done(null, user);
         }
-        // User and password both match, return user from
-        // done method which will be treated like success
-        return done(null, user);
-      }
     );
   }));
 /*passport.authenticate('signup', {
   successRedirect: '/homeLogged.html',
   failureRedirect: '/homeUnlogged.html'
-})*/
+  })*/
 // passport/signup.js
 passport.use('signup', new Strategy({
-    passReqToCallback : true },
+  passReqToCallback : true },
   function(req, username, password, done) {
     console.log('dedans de la fonction');
     findOrCreateUser = function(){
@@ -99,36 +99,36 @@ passport.use('signup', new Strategy({
         if (user) {
           console.log('User already exists');
           return done(null, false,
-            req.flash('message','User Already Exists'));
-          } else {
-            // if there is no user with that email
-            // create the user
-            var newUser = new utilisateur();
-            // set the user's local credentials
-            newUser.username = username;
-            newUser.password = createHash(password);
-            newUser.firstName = req.param('firstName');
-            newUser.lastName = req.param('lastName');
-            newUser.cityOfResidence = req.param('cityOfResidence');
-            newUser.description = req.param('description');
+              req.flash('message','User Already Exists'));
+        } else {
+          // if there is no user with that email
+          // create the user
+          var newUser = new utilisateur();
+          // set the user's local credentials
+          newUser.username = username;
+          newUser.password = createHash(password);
+          newUser.firstName = req.param('firstName');
+          newUser.lastName = req.param('lastName');
+          newUser.cityOfResidence = req.param('cityOfResidence');
+          newUser.description = req.param('description');
 
-            // save the user
-              newUser.save(function(err) {
-                if (err){
-                  console.log('Error in Saving user: '+err);
-                  throw err;
-                }
-                console.log('User Registration succesful');
-                return done(null, newUser);
-              });
-          }
-        });
-      };
-      // Delay the execution of findOrCreateUser and execute
-      // the method in the next tick of the event loop
-      process.nextTick(findOrCreateUser);
-    }
-  ));
+          // save the user
+          newUser.save(function(err) {
+            if (err){
+              console.log('Error in Saving user: '+err);
+              throw err;
+            }
+            console.log('User Registration succesful');
+            return done(null, newUser);
+          });
+        }
+      });
+    };
+    // Delay the execution of findOrCreateUser and execute
+    // the method in the next tick of the event loop
+    process.nextTick(findOrCreateUser);
+  }
+));
 
 
 app.get('/aboutCovoituride.html', function (req, res) {
@@ -150,19 +150,19 @@ app.post('/signup.html', function (req, res, next) {
     if (user[0] != undefined) {
       if (user[0].toObject().username == req.body.username) {
         console.log('Username already exists in database')
-        res.render('signup.pug', {error: 'Username already exists'})
+          res.render('signup.pug', {error: 'Username already exists'})
       }
       else {}
     }
     else {
       var newUser = new utilisateur({
-      // set the user's local credentials
-      username : req.body.username,
-      password : req.body.password,
-      firstName : req.body.firstName,
-      lastName : req.body.lastName,
-      cityOfResidence : req.body.cityOfResidence,
-      description : req.body.description,
+        // set the user's local credentials
+        username : req.body.username,
+        password : req.body.password,
+        firstName : req.body.firstName,
+        lastName : req.body.lastName,
+        cityOfResidence : req.body.cityOfResidence,
+        description : req.body.description,
       });
       console.log(newUser.username);
       // save the user
@@ -189,11 +189,11 @@ app.post('/login.html', function (req, res, next) {
     if (user[0] != undefined) {
       if (user[0].toObject().password == req.body.password) {
         console.log('Credentials ok - Welcome')
-        res.render('home.pug', { logged_in: true})
+          res.render('home.pug', { logged_in: true})
       }
       else {
         console.log('password inccorect, try again !')
-        res.render('login.pug', {error: 'Incorect password'})
+          res.render('login.pug', {error: 'Incorect password'})
 
       }
     }
@@ -209,13 +209,13 @@ app.get('/logout.html', function (req, res) {
 })
 
 app.use(function loggedIn(req, res, next) {
-    if (req.user) {
-      tempName = req.user;
-        next();
-    } else {
-        console.log('Must be logged in to acces this part of the site !');
-        res.redirect('/homeUnlogged.html');
-    }
+  if (req.user) {
+    tempName = req.user;
+    next();
+  } else {
+    console.log('Must be logged in to acces this part of the site !');
+    res.redirect('/homeUnlogged.html');
+  }
 });
 
 app.get('/homeLogged.html', function (req, res) {
