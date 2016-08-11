@@ -18,11 +18,17 @@ var rideSchema = new Schema({
   arrival: {
     type: String
   },
+  date: {
+    type: String
+  },
   carModel: {
     type: String
   },
+  maxSeats: {
+    type: Number, min: 1, max: 6
+  },
   seatsAvailable: {
-    type: { type: Number, min: 1, max: 6 }
+    type: Number
   },
   price: {
     type: Number
@@ -37,8 +43,10 @@ var rideSchema = new Schema({
   updated_at: Date
 });
 
-// on every save, add the date
+// on every save, add the date and the seats
 rideSchema.pre('save', function(next) {
+
+  this.seatsAvailable = this.maxSeats;
   // get the current date
   var currentDate = new Date();
 

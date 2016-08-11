@@ -5,21 +5,21 @@ block title
 
 block content
     .topBloc
-      a.a1(href='homeLogged.html') Home
+      a.a1(href='home.html') Home
       a.a2(href='searchRides.html') Search for a Ride
-    
+
       if logged_in
         a.a3(href='logout.html') Log Out
       else
         a.a3(href='signup.html') SignUp
         a.a4(href='login.html') Login
-    
+
     .leftBloc
       form(action='#')
         p Quick searche by town :
         input(style='width:80%; margin-left:5px; margin-bottom:3px;', type='text', name='search')
         input(style='margin-left:5px;', type='submit', value='search')
-      
+
       if logged_in
         a(href='myProfile.html', style='color:white; text-decoration:none;')
           p My profile
@@ -37,3 +37,5 @@ block content
         p About covoituride
     .bodyBloc
       h1 Bienvenue sur covoituride !
+      if error
+        div= error

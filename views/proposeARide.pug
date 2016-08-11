@@ -5,7 +5,7 @@ block title
 
 block content
     .topBloc
-      a.a1(href='homeUnlogged.html') Home
+      a.a1(href='home.html') Home
       a.a2(href='searchRides.html') Search for a Ride
       a.a3(href='logout.html') Log Out
     .leftBloc
@@ -31,6 +31,9 @@ block content
       form(action='/proposeARide.html', method='post')
         p Fill up the form in order to signup
         div(style='padding-bottom:5px;')
+          label Departure town:
+          input(type='text', name='departure')
+        div(style='padding-bottom:5px;')
           label Pick up place :
           input(type='text', name='pickUpPlace')
         div(style='padding-top:40px; padding-bottom:5px;')
@@ -42,24 +45,27 @@ block content
           label Arrival town:
           input(type='text', name='arrival')
         div(style='padding-top:40px; padding-bottom:5px;')
+          label Date:
+          input(type='text', name='date')
+        div(style='padding-top:40px; padding-bottom:5px;')
           label Car Model:
           input(type='text', name='carModel')
         div(style='padding-top:40px; padding-bottom:5px;')
           label Number of Seats:
-          select(name='seatsAvailable')
-            option(value='One') one
-            option(value='Two') Two
-            option(value='Three') Three
-            option(value='Four') Four
-            option(value='Five') Five
-            option(value='Six') Six
+          select(name='maxSeats')
+            option(value='1') one
+            option(value='2') Two
+            option(value='3') Three
+            option(value='4') Four
+            option(value='5') Five
+            option(value='6') Six
         div(style='padding-top:40px; padding-bottom:5px;')
           label Price:
-          input(type='text', name='price')
+          input(type='number', name='price')
         div(style='padding-top:40px; padding-bottom:5px;')
           label Stops:
-          input(type='text', name='Stops')
+          input(type='text', name='stops')
         div(style='padding-bottom:5px;')
-          input(type='submit', value='signup')
+          input(type='submit', value='Submit')
         if error
           div= error

@@ -10,6 +10,8 @@ var MongoClient = require('mongodb')
 , url = 'mongodb://localhost:27017/db'
 , bodyParser = require('body-parser');
 
+var cookieParser = require('cookie-parser');
+
 mongoose.Promise = require('bluebird');
 
 //Import mongoose models
@@ -50,6 +52,7 @@ app.use(flash());
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser())
 
 // Passport serialization
 passport.serializeUser(function(user, done) {
@@ -72,7 +75,7 @@ passport.use('login', new Strategy({
       // if no user with that username is Found
       if(user[0] == undefined) {
         console.log('No user with that username found')
-        return done(null, false, req.flash('loginMessage','No user found.'));
+        return done(null, false, req.flash('loginMessage','User not found.'));
       }
       //User found but wrong password
       else  if(user[0].toObject().password != req.body.password) {
@@ -80,6 +83,7 @@ passport.use('login', new Strategy({
           return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
       }
       //Everything is ok - return user connected
+      req.session.username = user[0].toObject().username;
       console.log('Everything ok - connected')
       return done(null, user);
     });
@@ -135,11 +139,14 @@ app.get('/aboutCovoituride.html', function (req, res) {
 })
 
 app.get('/homeUnlogged.html', function (req, res) {
-  res.render('home.pug', { logged_in: false})
+  res.render('homeUnlogged.pug')
 })
 
 app.get('/signup.html', function (req, res) {
-  res.render('signup.pug')
+  if (req.flash('signupMessage')) {
+    res.render('signup.pug', { message: req.flash('signupMessage')})
+  }
+  else res.render('signup.pug')
 })
 
 app.post('/signup.html', passport.authenticate('signup', {
@@ -149,26 +156,43 @@ app.post('/signup.html', passport.authenticate('signup', {
   }));
 
 app.get('/login.html', function (req, res) {
-  res.render('login.pug')
+  if (req.flash('loginMessage')) {
+    res.render('login.pug', { message: req.flash('loginMessage')})
+  }
+  else res.render('login.pug')
 })
 
 app.post('/login.html', passport.authenticate('login', {
     successRedirect: '/homeLogged.html',
-    failureRedirect: '/homeUnlogged.html',
+    failureRedirect: '/login.html',
     failureFlash: true //allow flash message
   }));
+
+app.get('/home.html', function (req, res){
+  if (req.user) {
+    res.redirect('/homeLogged.html');
+  }
+  else {
+    res.redirect('homeUnlogged.html');
+  }
+})
 
 app.use(function (req, res, next) {
     if (req.user) {
         return next();
     } else {
         console.log('Must be logged in to acces this part of the site !');
-        res.redirect('/homeUnlogged.html')
+        res.render('login.pug', {error: 'Please log in to acces this part of the site !'})
     }
 });
 
+app.get('/logout.html', function (req, res) {
+  req.logout()
+  res.render('homeUnlogged.pug')
+})
+
 app.get('/homeLogged.html', function (req, res) {
-  res.render('home.pug', { logged_in: true})
+  res.render('homeLogged.pug')
 })
 
 app.get('/myProfile.html', function (req, res) {
@@ -180,18 +204,18 @@ app.get('/proposeARide.html', function (req, res) {
 })
 
 app.post('/proposeARide.html', function (req, res) {
-  console.log(req.username);
   var newRide = new trajet({
   // set the user's local credentials
   departure : req.body.departure,
   pickUpPlace : req.body.pickUpPlace,
   midRideTakeOff : req.body.midRideTakeOff,
   arrival : req.body.arrival,
+  date : req.body.date,
   carModel : req.body.carModel,
-  seatsAvailable : req.body.seatsAvailable,
+  maxSeats : req.body.maxSeats,
   price : req.body.price,
   stops : req.body.stops,
-  driverUsername : req.user.username,
+  driverUsername : req.session.username,
   });
   console.log(newRide);
   // save the user
@@ -202,12 +226,21 @@ app.post('/proposeARide.html', function (req, res) {
     }
     console.log('Ride Registration succesful');
   });
-  res.render('home.pug', { logged_in: true})
+  res.render('homeLogged.pug')
 });
 
-
 app.get('/proposedRides.html', function (req, res) {
-  res.render('proposedRides.pug')
+  trajet.find({ driverUsername: req.session.username }, function(err, trajets) {
+    if (err)
+      res.render('proposedRides.pug');
+    if(trajets == undefined) {
+      console.log('No rides found for that username')
+      res.render('proposedRides.pug')
+    }
+    console.log('Everything ok - rides found')
+    console.log(trajets)
+    res.render('proposedRides.pug', {drives: trajets})
+  });
 })
 
 app.get('/subscribedRides.html', function (req, res) {
@@ -220,11 +253,6 @@ app.get('/searchRides.html', function (req, res) {
 
 app.get('/searchRiders.html', function (req, res) {
   res.render('searchRiders.pug')
-})
-
-app.get('/logout.html', function (req, res) {
-  req.logout()
-  res.render('homeUnlogged.pug')
 })
 
 app.listen(3000)

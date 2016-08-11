@@ -5,7 +5,7 @@ block title
 
 block content
     .topBloc
-      a.a1(href='homeUnlogged.html') Home
+      a.a1(href='home.html') Home
       a.a2(href='searchRides.html') Search for a Ride
       a.a3(href='logout.html') Log Out
     .leftBloc
@@ -28,7 +28,28 @@ block content
       a(href='aboutCovoituride.html', style='color:white; text-decoration:none;')
         p About covoituride
     .bodyBloc
-      p See your proposed rides here
-      p Loads user&apos;s proposed rides, see if people are interested in it
-      p Allow user to change informations about the ride
-      p Allow user to see other user that are in the ride&apos;s profile
+      if drives
+        div
+          table(border='1', bordercolor= 'CYAN')
+            thead
+              tr: th Departure
+                  th Pick up place
+                  th Mid ride take off
+                  th Arrival
+                  th Date
+                  th Car model
+                  th Seats available
+                  th Price
+                  th Stops
+            tbody(style='color:white; text-decoration:none;')
+              each drive in drives
+                tr
+                  td #{drive.departure}
+                  td #{drive.pickUpPlace}
+                  td #{drive.midRideTakeOff}
+                  td #{drive.arrival}
+                  td #{drive.date}
+                  td #{drive.carModel}
+                  td #{drive.seatsAvailable}
+                  td #{drive.price}
+                  td #{drive.stops}

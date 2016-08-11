@@ -5,7 +5,7 @@ block title
 
 block content
     .topBloc
-      a.a1(href='homeUnlogged.html') Home
+      a.a1(href='home.html') Home
       a.a2(href='searchRides.html') Search for a Ride
     .unsplit_bodyBloc
       form(action='/signup.html', method='post')
@@ -32,3 +32,5 @@ block content
           input(type='submit', value='signup')
         if error
           div= error
+        if message
+          div= message
