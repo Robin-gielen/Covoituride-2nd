@@ -37,6 +37,7 @@ db.once('open', function() {
 
 //Views configuration
 app.set('views', __dirname + '/views')
+app.locals.pretty = true; // nice HTML
 app.set('view engine', 'pug')
 app.use(logger({path: "event.log"}));
 app.use(express.static(__dirname + '/public'))
