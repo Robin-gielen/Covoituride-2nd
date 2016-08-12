@@ -16,7 +16,7 @@ block content
       a(href='myProfile.html', style='color:white; text-decoration:none;')
         p My profile
       a(href='proposeARide.html', style='color:white; text-decoration:none;')
-        p ProposeARide
+        p Propose A Ride
       a(href='proposedRides.html', style='color:white; text-decoration:none;')
         p My proposed rides
       a(href='subscribedRides.html', style='color:white; text-decoration:none;')
@@ -28,12 +28,14 @@ block content
       a(href='aboutCovoituride.html', style='color:white; text-decoration:none;')
         p About covoituride
     .bodyBloc
-      p Ici l&apos;utilisateur peut rechercher des covoiturage de mani&egrave;re plus approfondie
-      p Ville de depart :
-      p Ville d&apos;arrivee :
-      p Critere de recherche 1 :
-      p Critere de recherche 2 :
-      p Critere de recherche 3 :
-      p Critere de recherche 4 :
-      p Critere de recherche 5 :
-      p Critere de recherche 6 :
+      form(action='/foundRides.html', method='post')
+        div(style='padding-top:40px; padding-bottom:5px;')
+          label Departure town:
+          input(type='text', name='departureTown')
+        div(style='padding-bottom:5px;')
+          label Arrival town :
+          input(type='text', name='arrivalTown')
+        div(style='padding-bottom:5px;')
+          input(type='submit', value='Search rides')
+        if error
+          div= error

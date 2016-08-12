@@ -36,6 +36,9 @@ var rideSchema = new Schema({
   stops: {
     type: String
   },
+  participants: {
+    type: [String]
+  },
   driverUsername: {
     type: String
   },

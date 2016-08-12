@@ -71,7 +71,6 @@ passport.use('login', new Strategy({
       //if there's an error with the reading of the db
       if (err)
         return done(err);
-      console.log('from db' + user)
       // if no user with that username is Found
       if(user[0] == undefined) {
         console.log('No user with that username found')
@@ -196,8 +195,51 @@ app.get('/homeLogged.html', function (req, res) {
 })
 
 app.get('/myProfile.html', function (req, res) {
-  res.render('myProfile.pug')
+  utilisateur.find({ username: req.session.username }, function(err, user) {
+    if (err) throw err;
+    if (user[0] != undefined) {
+      res.render('myProfile.pug', {
+        usernameDB: user[0].toObject().username,
+        passwordDB: user[0].toObject().password,
+        firstNameDB: user[0].toObject().firstName,
+        lastNameDB: user[0].toObject().lastName,
+        cityOfResidenceDB: user[0].toObject().cityOfResidence,
+        descriptionDB: user[0].toObject().description,
+      });
+    }
+  });
 })
+
+app.get('/modifyProfile.html', function (req, res) {
+  utilisateur.find({ username: req.session.username }, function(err, user) {
+    if (err) throw err;
+    if (user[0] != undefined) {
+      res.render('modifyProfile.pug', {
+        usernameDB: user[0].toObject().username,
+        passwordDB: user[0].toObject().password,
+        firstNameDB: user[0].toObject().firstName,
+        lastNameDB: user[0].toObject().lastName,
+        cityOfResidenceDB: user[0].toObject().cityOfResidence,
+        descriptionDB: user[0].toObject().description,
+      });
+    }
+  });
+});
+
+app.post('/modifyProfile.html', function(req, res) {
+  console.log('trying to UPDATE')
+  console.log(req.body.firstNameDB)
+  utilisateur.update(
+    {username: req.session.username},
+    {
+      $set: {password: req.body.passwordDB},
+      $set: {firstName: req.body.firstNameDB},
+      $set: {lastName: req.body.lastNameDB},
+      $set: {cityOfResidence: req.body.cityOfResidenceDB},
+      $set: {description: req.body.descriptionDB}
+    }
+  )
+});
 
 app.get('/proposeARide.html', function (req, res) {
   res.render('proposeARide.pug')
@@ -249,6 +291,55 @@ app.get('/subscribedRides.html', function (req, res) {
 
 app.get('/searchRides.html', function (req, res) {
   res.render('searchRides.pug')
+})
+
+app.post('/foundRides.html', function (req, res) {
+  if (req.body.departureTown && req.body.arrivalTown == '') {
+    trajet.find({ departure: req.body.departureTown}, function(err, foundRides) {
+      if (err)
+        res.render('searchRides.pug', {error: 'No rides found'});
+      else if(foundRides[0] == undefined) {
+        console.log('No rides found for that departure/arrival')
+        res.render('searchRides.pug', {error: 'No rides found'})
+      }
+      else {
+        console.log('Everything ok - rides found WITH DEPARTURE')
+        res.render('foundRides.pug', {drives: foundRides})
+      }
+    });
+  }
+  else if (req.body.arrivalTown && req.body.departureTown == '') {
+    trajet.find({ arrival: req.body.arrivalTown}, function(err, foundRides) {
+      if (err)
+        res.render('searchRides.pug', {error: 'No rides found'});
+      else if(foundRides[0] == undefined) {
+        console.log('No rides found for that departure/arrival')
+        res.render('searchRides.pug', {error: 'No rides found'})
+      }
+      else {
+        console.log('Everything ok - rides found WITH ARRIVAL')
+        res.render('foundRides.pug', {drives: foundRides})
+      }
+    });
+  }
+  else if (req.body.arrivalTown && req.body.departureTown){
+    trajet.find({departure: req.body.departureTown, arrival: req.body.arrivalTown}, function(err, foundRides) {
+      if (err) {
+        res.render('searchRides.pug', {error: 'No rides found'});
+      }
+      else if(foundRides[0] == undefined) {
+        console.log('No rides found for that departure/arrival')
+        res.render('searchRides.pug', {error: 'No rides found'})
+      }
+      else {
+        console.log('Everything ok - rides found WITH DEPARTURE/ARRIVAL')
+        res.render('foundRides.pug', {drives: foundRides})
+      }
+    });
+  }
+  else {
+    res.render('searchRides.pug', {error: 'No rides found for those towns'})
+  }
 })
 
 app.get('/searchRiders.html', function (req, res) {
