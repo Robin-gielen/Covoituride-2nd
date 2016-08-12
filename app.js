@@ -15,7 +15,7 @@ var cookieParser = require('cookie-parser');
 mongoose.Promise = require('bluebird');
 
 //Import mongoose models
-var utilisateur = require('./models/users');
+var utilisateur = require('./models/rider');
 var trajet = require('./models/ride');
 
 //Passport dependencies
@@ -67,23 +67,24 @@ passport.deserializeUser(function(user, done) {
 passport.use('login', new Strategy({
   passReqToCallback : true },
   function(req, username, password, done) {
+    if(req.user)
+    {
+      res.redirect('home.html');
+    }
     utilisateur.find({ username: req.body.username }, function(err, user) {
       //if there's an error with the reading of the db
       if (err)
         return done(err);
       // if no user with that username is Found
       if(user[0] == undefined) {
-        console.log('No user with that username found')
         return done(null, false, req.flash('loginMessage','User not found.'));
       }
       //User found but wrong password
       else  if(user[0].toObject().password != req.body.password) {
-          console.log('Wrong Password')
           return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
       }
       //Everything is ok - return user connected
       req.session.username = user[0].toObject().username;
-      console.log('Everything ok - connected')
       return done(null, user);
     });
   }
@@ -93,6 +94,10 @@ passport.use('login', new Strategy({
 passport.use('signup', new Strategy({
     passReqToCallback : true },
    function(req, email, password, done) {
+      if(req.user)
+      {
+        res.redirect('home.html');
+      }
        // asynchronous
        // User.findOne wont fire unless data is sent back
        process.nextTick(function() {
@@ -104,7 +109,6 @@ passport.use('signup', new Strategy({
                return done(err);
            // check to see if theres already a user with that username
            if (user[0] != undefined) {
-             console.log('That username is already taken.')
                return done(null, false, req.flash('signupMessage', 'That username is already taken.'));
            } else {
                // if there is no user with that username
@@ -121,10 +125,8 @@ passport.use('signup', new Strategy({
                // save the user
                newUser.save(function(err) {
                    if (err){
-                     console.log('Error in Saving user: '+err);
                      throw err;
                    }
-                   console.log('User Created with ' + newUser)
                    return done(null, newUser);
                });
            }
@@ -138,11 +140,19 @@ app.get('/aboutCovoituride.html', function (req, res) {
 })
 
 app.get('/homeUnlogged.html', function (req, res) {
+  if(req.user)
+  {
+    res.redirect('home.html');
+  }
   res.render('homeUnlogged.pug')
 })
 
 app.get('/signup.html', function (req, res) {
-  if (req.flash('signupMessage')) {
+  if(req.user)
+  {
+    res.redirect('home.html');
+  }
+  else if (req.flash('signupMessage')) {
     res.render('signup.pug', { message: req.flash('signupMessage')})
   }
   else res.render('signup.pug')
@@ -150,12 +160,16 @@ app.get('/signup.html', function (req, res) {
 
 app.post('/signup.html', passport.authenticate('signup', {
     successRedirect: '/login.html',
-    failureRedirect: '/subscribe.html',
+    failureRedirect: '/signup.html',
     failureFlash: true //allow flash message
   }));
 
 app.get('/login.html', function (req, res) {
-  if (req.flash('loginMessage')) {
+  if(req.user)
+  {
+    res.redirect('home.html');
+  }
+  else if (req.flash('loginMessage')) {
     res.render('login.pug', { message: req.flash('loginMessage')})
   }
   else res.render('login.pug')
@@ -180,7 +194,6 @@ app.use(function (req, res, next) {
     if (req.user) {
         return next();
     } else {
-        console.log('Must be logged in to acces this part of the site !');
         res.render('login.pug', {error: 'Please log in to acces this part of the site !'})
     }
 });
@@ -227,18 +240,17 @@ app.get('/modifyProfile.html', function (req, res) {
 });
 
 app.post('/modifyProfile.html', function(req, res) {
-  console.log('trying to UPDATE')
-  console.log(req.body.firstNameDB)
-  utilisateur.update(
-    {username: req.session.username},
-    {
-      $set: {password: req.body.passwordDB},
-      $set: {firstName: req.body.firstNameDB},
-      $set: {lastName: req.body.lastNameDB},
-      $set: {cityOfResidence: req.body.cityOfResidenceDB},
-      $set: {description: req.body.descriptionDB}
-    }
-  )
+  var query = {'username': req.session.username};
+  utilisateur.findOneAndUpdate(query, {
+    password: req.body.passwordDB,
+    firstName: req.body.firstNameDB,
+    lastName: req.body.lastNameDB,
+    cityOfResidence: req.body.cityOfResidenceDB,
+    description: req.body.descriptionDB
+    }, {upsert:true}, function(err, doc){
+    if (err) return res.send(500, { error: err });
+    return res.redirect('/myProfile.html');
+  });
 });
 
 app.get('/proposeARide.html', function (req, res) {
@@ -259,14 +271,11 @@ app.post('/proposeARide.html', function (req, res) {
   stops : req.body.stops,
   driverUsername : req.session.username,
   });
-  console.log(newRide);
   // save the user
   newRide.save(function(err, resp) {
     if (err){
-      console.log('Error in Saving ride: '+err);
       throw err;
     }
-    console.log('Ride Registration succesful');
   });
   res.render('homeLogged.pug')
 });
@@ -276,11 +285,8 @@ app.get('/proposedRides.html', function (req, res) {
     if (err)
       res.render('proposedRides.pug');
     if(trajets == undefined) {
-      console.log('No rides found for that username')
       res.render('proposedRides.pug')
     }
-    console.log('Everything ok - rides found')
-    console.log(trajets)
     res.render('proposedRides.pug', {drives: trajets})
   });
 })
@@ -295,15 +301,13 @@ app.get('/searchRides.html', function (req, res) {
 
 app.post('/foundRides.html', function (req, res) {
   if (req.body.departureTown && req.body.arrivalTown == '') {
-    trajet.find({ departure: req.body.departureTown}, function(err, foundRides) {
+    trajet.find({ departure: new RegExp(req.body.departureTown, "i")}, function(err, foundRides) {
       if (err)
         res.render('searchRides.pug', {error: 'No rides found'});
       else if(foundRides[0] == undefined) {
-        console.log('No rides found for that departure/arrival')
         res.render('searchRides.pug', {error: 'No rides found'})
       }
       else {
-        console.log('Everything ok - rides found WITH DEPARTURE')
         res.render('foundRides.pug', {drives: foundRides})
       }
     });
@@ -313,11 +317,9 @@ app.post('/foundRides.html', function (req, res) {
       if (err)
         res.render('searchRides.pug', {error: 'No rides found'});
       else if(foundRides[0] == undefined) {
-        console.log('No rides found for that departure/arrival')
         res.render('searchRides.pug', {error: 'No rides found'})
       }
       else {
-        console.log('Everything ok - rides found WITH ARRIVAL')
         res.render('foundRides.pug', {drives: foundRides})
       }
     });
@@ -328,11 +330,9 @@ app.post('/foundRides.html', function (req, res) {
         res.render('searchRides.pug', {error: 'No rides found'});
       }
       else if(foundRides[0] == undefined) {
-        console.log('No rides found for that departure/arrival')
         res.render('searchRides.pug', {error: 'No rides found'})
       }
       else {
-        console.log('Everything ok - rides found WITH DEPARTURE/ARRIVAL')
         res.render('foundRides.pug', {drives: foundRides})
       }
     });
@@ -344,6 +344,59 @@ app.post('/foundRides.html', function (req, res) {
 
 app.get('/searchRiders.html', function (req, res) {
   res.render('searchRiders.pug')
+})
+
+app.post('/foundRiders.html', function (req, res) {
+  console.log(req.body.searchMethod);
+  var temp = req.body.searchMethod;
+  if (temp == 'username') {
+    utilisateur.find({ username: new RegExp(req.body.searchTerm, "i")}, function(err, foundRiders) {
+      console.log('USERNAME')
+      if (err) {
+        res.render('searchRiders.pug', {error: 'No riders found - Please try again a bit later'});
+      }
+      else if(foundRiders[0] == undefined) {
+        res.render('searchRiders.pug', {error: 'No riders found with this information'})
+      }
+      else {
+        console.log(foundRiders)
+        res.render('foundRiders.pug', {riders: foundRiders})
+      }
+    });
+  }
+  else if (temp == 'firstName') {
+    utilisateur.find({ firstName: new RegExp(req.body.searchTerm, "i")}, function(err, foundRiders) {
+      console.log('FIRSTNAME')
+      if (err) {
+        res.render('searchRiders.pug', {error: 'No riders found - Please try again a bit later'});
+      }
+      else if(foundRiders[0] == undefined) {
+        res.render('searchRiders.pug', {error: 'No riders found with this information'})
+      }
+      else {
+        console.log(foundRiders)
+        res.render('foundRiders.pug', {riders: foundRiders})
+      }
+    });
+  }
+  else if (temp == 'lastName') {
+    utilisateur.find({ lastName: new RegExp(req.body.searchTerm, "i")}, function(err, foundRiders) {
+      console.log('LASTNAME')
+      if (err) {
+        res.render('searchRiders.pug', {error: 'No riders found - Please try again a bit later'});
+      }
+      else if(foundRiders[0] == undefined) {
+        res.render('searchRiders.pug', {error: 'No riders found with this information'})
+      }
+      else {
+        console.log(foundRiders)
+        res.render('foundRiders.pug', {riders: foundRiders})
+      }
+    });
+  }
+  else {
+    res.render('searchRiders.pug', {error: 'No riders found for those infos'})
+  }
 })
 
 app.listen(3000)
