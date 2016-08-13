@@ -457,13 +457,17 @@ app.use('/subscribeToRide.html/', function(req, res, next) {
         else {
           var tempRiders = foundRide.participants;
           tempRiders.push(req.session.username);
+          console.log('DU GROS CACA' + foundRide.seatsAvailable);
+          var tempSeats = foundRide.seatsAvailable;
+          var tempSeats = tempSeats - 1;
           console.log('TRYING TO UPDATE' + 'UPDATE VALUE: TEMPRIDERS=' + tempRiders)
-          trajet.findByIdAndUpdate(rideID, {participants: tempRiders}, function(err, foundRide) {
+          trajet.findByIdAndUpdate(rideID, {participants: tempRiders, seatsAvailable: tempSeats}, function(err, foundRide) {
             if (err) {
               res.redirect('/home.html');
             }
           });
-          res.render('subscribedRides.pug');
+          console.log(foundRide.seatsAvailable);
+          res.redirect('/subscribedRides.html');
         }
       }
     }

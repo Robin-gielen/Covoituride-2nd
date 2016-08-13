@@ -41,7 +41,7 @@ block content
                   th Seats available
                   th Price
                   th Stops
-                  th Access Rides Infos
+                  th Riders' Subscribed
             tbody(style='color:white; text-decoration:none;')
               each drive in drives
                 tr
@@ -54,3 +54,4 @@ block content
                   td #{drive.seatsAvailable}
                   td #{drive.price}
                   td #{drive.stops}
+                  td #{drive.participants}
