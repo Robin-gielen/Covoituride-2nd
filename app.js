@@ -428,34 +428,43 @@ app.use('/subscribeToRide.html/', function(req, res, next) {
   trajet.findById(rideID, function(err, foundRide) {
     console.log('COUCOUCOUCOU' + foundRide)
     if (err) {
-      res.redirect('back');
+      res.redirect('/home.html');
     }
     else if(foundRide == undefined) {
-      res.redirect('back');
+      res.redirect('/home.html');
     }
     else if(foundRide.participants == undefined) {
-      res.redirect('back');
+      res.redirect('/home.html');
     }
     else {
       var booleen = false;
-      for(var i = 0; i < foundRide.participants.length;i++){
-        if (foundRide.participants[i] == req.session.username)
-        {
-          booleen = true;
-        }
-      }
-      if (booleen) {
-        res.redirect('/home.html', {error: 'You are already subscribed to this ride'});
+      console.log(foundRide.participants.length);
+
+      if (foundRide.participants == undefined) {
+        res.redirect('/home.html');
       }
       else {
-        var tempRiders = foundRide.participants + req.session.username;
-        console.log('TRYING TO UPDATE' + 'UPDATE VALUE: TEMPRIDERS=' + tempRiders)
-        trajet.findByIdAndUpdate(rideID, tempRiders, function(err, foundRide) {
-          if (err) {
-            res.redirect('back');
+        for(var i = 0; i < foundRide.participants.length;i++){
+          if (foundRide.participants[i] == req.session.username)
+          {
+            booleen = true;
           }
-        });
-        res.render('subscribedRides.pug');
+        }
+        if (booleen) {
+          console.log('GOINGHOME')
+          res.redirect('/home.html');
+        }
+        else {
+          var tempRiders = foundRide.participants;
+          tempRiders.push(req.session.username);
+          console.log('TRYING TO UPDATE' + 'UPDATE VALUE: TEMPRIDERS=' + tempRiders)
+          trajet.findByIdAndUpdate(rideID, {participants: tempRiders}, function(err, foundRide) {
+            if (err) {
+              res.redirect('/home.html');
+            }
+          });
+          res.render('subscribedRides.pug');
+        }
       }
     }
   });
