@@ -9,10 +9,10 @@ block content
       a.a2(href='searchRides.html') Search for a Ride
       a.a3(href='logout.html') Log Out
     .leftBloc
-      form(action='#')
-        p Quick searche by town :
+      form(action='/quickSearchRides.html', method='post')
+        p Quick search by departure town :
         input(style='width:80%; margin-left:5px; margin-bottom:3px;', type='text', name='search')
-        input(style='margin-left:5px;', type='submit', value='search')
+        input(style='margin-left:5px;', type='submit', value='Search rides')
       a(href='myProfile.html', style='color:white; text-decoration:none;')
         p My profile
       a(href='proposeARide.html', style='color:white; text-decoration:none;')

@@ -9,10 +9,10 @@ block content
       a.a2(href='searchRides.html') Search for a Ride
       a.a3(href='logout.html') Log Out
     .leftBloc
-      form(action='#')
-        p Quick searche by town :
+      form(action='/quickSearchRides.html', method='post')
+        p Quick search by departure town :
         input(style='width:80%; margin-left:5px; margin-bottom:3px;', type='text', name='search')
-        input(style='margin-left:5px;', type='submit', value='search')
+        input(style='margin-left:5px;', type='submit', value='Search rides')
       a(href='myProfile.html', style='color:white; text-decoration:none;')
         p My profile
       a(href='proposeARide.html', style='color:white; text-decoration:none;')
@@ -28,6 +28,29 @@ block content
       a(href='aboutCovoituride.html', style='color:white; text-decoration:none;')
         p About covoituride
     .bodyBloc
-      p See your subscribed rides here
-      p Loads user&apos;s subscribed rides, see if information about it changed
-      p Allow user to see other users that are in the ride&apos;s profile
+      if drives
+        div
+          table(border='1', bordercolor= 'black')
+            thead
+              tr: th Departure
+                  th Pick up place
+                  th Mid ride take off
+                  th Arrival
+                  th Date
+                  th Car model
+                  th Seats available
+                  th Price
+                  th Stops
+                  th Access Rides Infos
+            tbody(style='color:white; text-decoration:none;')
+              each drive in drives
+                tr
+                  td #{drive.departure}
+                  td #{drive.pickUpPlace}
+                  td #{drive.midRideTakeOff}
+                  td #{drive.arrival}
+                  td #{drive.date}
+                  td #{drive.carModel}
+                  td #{drive.seatsAvailable}
+                  td #{drive.price}
+                  td #{drive.stops}

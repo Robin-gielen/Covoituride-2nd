@@ -278,7 +278,7 @@ app.post('/proposeARide.html', function (req, res) {
       throw err;
     }
   });
-  res.render('homeLogged.pug')
+  res.redirect('proposedRides.html')
 });
 
 app.get('/proposedRides.html', function (req, res) {
@@ -293,7 +293,14 @@ app.get('/proposedRides.html', function (req, res) {
 })
 
 app.get('/subscribedRides.html', function (req, res) {
-  res.render('subscribedRides.pug')
+  trajet.find({ participants: req.session.username }, function(err, trajets) {
+    if (err)
+      res.render('subscribedRides.pug');
+    if(trajets == undefined) {
+      res.render('subscribedRides.pug')
+    }
+    res.render('subscribedRides.pug', {drives: trajets})
+  });
 })
 
 app.get('/searchRides.html', function (req, res) {
@@ -340,6 +347,21 @@ app.post('/foundRides.html', function (req, res) {
   }
   else {
     res.render('searchRides.pug', {error: 'No rides found for those towns'})
+  }
+})
+
+app.post('/quickSearchRides.html', function (req, res) {
+  if (req.body.search) {
+    trajet.find({ departure: new RegExp(req.body.search, "i")}, function(err, foundRides) {
+      if (err)
+        res.render('searchRides.pug', {error: 'No rides found'});
+      else if(foundRides[0] == undefined) {
+        res.render('searchRides.pug', {error: 'No rides found'})
+      }
+      else {
+        res.render('quickFoundRides.pug', {drives: foundRides})
+      }
+    });
   }
 })
 
@@ -398,6 +420,40 @@ app.post('/foundRiders.html', function (req, res) {
   else {
     res.render('searchRiders.pug', {error: 'No riders found for those infos'})
   }
-})
+});
+
+app.use('/rideInfos.html', function(req, res, next) {
+  console.log(req.url)
+  var rideID = req.url.substring(1);
+  trajet.findById(rideID, function(err, foundRide) {
+    console.log('COUCOU' + foundRide)
+    if (err) {
+      res.redirect('back');
+    }
+    else if(foundRide == undefined) {
+      res.redirect('back');
+    }
+    else {
+      res.render('rideInfos.pug', {drives: foundRide})
+    }
+  });
+});
+
+app.use('/subscribeToRide.html', function(req, res, next) {
+  console.log(req.url)
+  var rideID = req.url.substring(1);
+  trajet.findById(rideID, function(err, foundRide) {
+    console.log('COUCOU' + foundRide)
+    if (err) {
+      res.redirect('back');
+    }
+    else if(foundRide == undefined) {
+      res.redirect('back');
+    }
+    else {
+      res.render('rideInfos.pug', {drives: foundRide})
+    }
+  });
+});
 
 app.listen(3000)

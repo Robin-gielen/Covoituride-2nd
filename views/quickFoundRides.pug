@@ -1,7 +1,7 @@
 extends layout.pug
 
 block title
-  title Found riders
+  title Quick Found rides
 
 block content
     .topBloc
@@ -28,28 +28,30 @@ block content
       a(href='aboutCovoituride.html', style='color:white; text-decoration:none;')
         p About covoituride
     .bodyBloc
-      if riders
+      if drives
         div
           table(border='1', bordercolor= 'black')
             thead
-              tr: th Username
-                  th First Name
-                  th Last Name
-                  th City of Residence
-                  th Description
-                  th Votes
-                  th Subscribed Since
-                  th Upvote
-                  th Downvote
+              tr: th Departure
+                  th Pick up place
+                  th Mid ride take off
+                  th Arrival
+                  th Date
+                  th Car model
+                  th Seats available
+                  th Price
+                  th Stops
+                  th Access Rides Infos
             tbody(style='color:white; text-decoration:none;')
-              each rider in riders
+              each drive in drives
                 tr
-                  td #{rider.username}
-                  td #{rider.firstName}
-                  td #{rider.lastName}
-                  td #{rider.cityOfResidence}
-                  td #{rider.description}
-                  td #{rider.votes}
-                  td #{rider.created_at}
-                  td #{rider.Upvote}
-                  td #{rider.Downvote}
+                  td #{drive.departure}
+                  td #{drive.pickUpPlace}
+                  td #{drive.midRideTakeOff}
+                  td #{drive.arrival}
+                  td #{drive.date}
+                  td #{drive.carModel}
+                  td #{drive.seatsAvailable}
+                  td #{drive.price}
+                  td #{drive.stops}
+                  td #[a(href='rideInfos.html/'+drive.id) Infos]

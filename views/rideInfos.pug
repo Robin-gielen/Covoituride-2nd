@@ -1,0 +1,56 @@
+extends layout.pug
+
+block title
+  title Ride Infos
+
+block content
+    .topBloc
+      a.a1(href='/home.html') Home
+      a.a2(href='/searchRides.html') Search for a Ride
+      a.a3(href='/logout.html') Log Out
+    .leftBloc
+      form(action='/quickSearchRides.html', method='post')
+        p Quick search by departure town :
+        input(style='width:80%; margin-left:5px; margin-bottom:3px;', type='text', name='search')
+        input(style='margin-left:5px;', type='submit', value='Search rides')
+      a(href='/myProfile.html', style='color:white; text-decoration:none;')
+        p My profile
+      a(href='/proposeARide.html', style='color:white; text-decoration:none;')
+        p Propose A Ride
+      a(href='/proposedRides.html', style='color:white; text-decoration:none;')
+        p My proposed rides
+      a(href='/subscribedRides.html', style='color:white; text-decoration:none;')
+        p My subscribed rides
+      a(href='/searchRides.html', style='color:white; text-decoration:none;')
+        p Search for rides
+      a(href='/searchRiders.html', style='color:white; text-decoration:none;')
+        p Search for riders
+      a(href='/aboutCovoituride.html', style='color:white; text-decoration:none;')
+        p About covoituride
+    .bodyBloc
+      if drives
+        div
+          table(border='1', bordercolor= 'black')
+            thead
+              tr: th Departure
+                  th Pick up place
+                  th Mid ride take off
+                  th Arrival
+                  th Date
+                  th Car model
+                  th Seats available
+                  th Price
+                  th Stops
+                  th Subscribe to Ride
+            tbody(style='color:white; text-decoration:none;')
+                tr
+                  td #{drives.departure}
+                  td #{drives.pickUpPlace}
+                  td #{drives.midRideTakeOff}
+                  td #{drives.arrival}
+                  td #{drives.date}
+                  td #{drives.carModel}
+                  td #{drives.seatsAvailable}
+                  td #{drives.price}
+                  td #{drives.stops}
+                  td #[a(href='rideInfos.html/'+drives.id) Subscribe]
