@@ -11,6 +11,7 @@ var MongoClient = require('mongodb')
 , bodyParser = require('body-parser');
 
 var cookieParser = require('cookie-parser');
+var crypto = require('crypto');
 
 mongoose.Promise = require('bluebird');
 
@@ -72,69 +73,83 @@ passport.use('login', new Strategy({
     {
       res.redirect('home.html');
     }
-    utilisateur.find({ username: req.body.username }, function(err, user) {
-      //if there's an error with the reading of the db
-      if (err)
-        return done(err);
-      // if no user with that username is Found
-      if(user[0] == undefined) {
-        return done(null, false, req.flash('loginMessage','User not found.'));
-      }
-      //User found but wrong password
-      else  if(user[0].toObject().password != req.body.password) {
+
+    // hash the password to check if its ok
+    crypto.pbkdf2(req.body.password, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+      if (err) throw err;
+      var user_hash = key.toString('base64'); 
+      utilisateur.find({ username: req.body.username }, function(err, user) {
+        //if there's an error with the reading of the db
+
+        var db_hash = user[0].toObject().password_hash;
+        if (err)
+          return done(err);
+        // if no user with that username is Found
+        if(user[0] == undefined) {
+          return done(null, false, req.flash('loginMessage','User not found.'));
+        }
+        //User found but wrong password_hash
+        else  if(user_hash != db_hash) {
           return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.'));
-      }
-      //Everything is ok - return user connected
-      req.session.username = user[0].toObject().username;
-      return done(null, user);
+        }
+
+        //Everything is ok - return user connected
+        req.session.username = user[0].toObject().username;
+        return done(null, user);
+      });
     });
   }
 ));
 
 // passport/signup.js
 passport.use('signup', new Strategy({
-    passReqToCallback : true },
-   function(req, email, password, done) {
-      if(req.user)
-      {
-        res.redirect('home.html');
-      }
-       // asynchronous
-       // User.findOne wont fire unless data is sent back
-       process.nextTick(function() {
-       // find a user whose username is the same as the forms username
-       // we are checking to see if the user trying to login already exists
-       utilisateur.find({ username: req.body.username }, function(err, user) {
-           // if there are any errors, return the error
-           if (err)
-               return done(err);
-           // check to see if theres already a user with that username
-           if (user[0] != undefined) {
-               return done(null, false, req.flash('signupMessage', 'That username is already taken.'));
-           } else {
-               // if there is no user with that username
-               // create the user
-               var newUser = new utilisateur({
-               // set the user's local credentials
-               username : req.body.username,
-               password : req.body.password,
-               firstName : req.body.firstName,
-               lastName : req.body.lastName,
-               cityOfResidence : req.body.cityOfResidence,
-               description : req.body.description,
-               });
-               // save the user
-               newUser.save(function(err) {
-                   if (err){
-                     throw err;
-                   }
-                   return done(null, newUser);
-               });
-           }
-       });
-       });
-   })
- );
+  passReqToCallback : true },
+  function(req, email, password, done) {
+    if(req.user)
+    {
+      res.redirect('home.html');
+    }
+    // asynchronous
+    // User.findOne wont fire unless data is sent back
+    process.nextTick(function() {
+      // find a user whose username is the same as the forms username
+      // we are checking to see if the user trying to login already exists
+      utilisateur.find({ username: req.body.username }, function(err, user) {
+        // if there are any errors, return the error
+        if (err)
+          return done(err);
+        // check to see if theres already a user with that username
+        if (user[0] != undefined) {
+          return done(null, false, req.flash('signupMessage', 'That username is already taken.'));
+        } else {
+          // if there is no user with that username
+          // hash the password
+
+          crypto.pbkdf2(req.body.password, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+
+            // create the user
+            var newUser = new utilisateur({
+              // set the user's local credentials
+              username : req.body.username,
+              password_hash : key.toString('base64'),
+              firstName : req.body.firstName,
+              lastName : req.body.lastName,
+              cityOfResidence : req.body.cityOfResidence,
+              description : req.body.description,
+            });
+            // save the user
+            newUser.save(function(err) {
+              if (err){
+                throw err;
+              }
+              return done(null, newUser);
+            });
+          });
+        }
+      });
+    });
+  })
+);
 
 app.get('/aboutCovoituride.html', function (req, res) {
   res.render('aboutCovoituride.pug')
@@ -214,7 +229,7 @@ app.get('/myProfile.html', function (req, res) {
     if (user[0] != undefined) {
       res.render('myProfile.pug', {
         usernameDB: user[0].toObject().username,
-        passwordDB: user[0].toObject().password,
+        passwordDB: user[0].toObject().password_hash,
         firstNameDB: user[0].toObject().firstName,
         lastNameDB: user[0].toObject().lastName,
         cityOfResidenceDB: user[0].toObject().cityOfResidence,
@@ -230,7 +245,7 @@ app.get('/modifyProfile.html', function (req, res) {
     if (user[0] != undefined) {
       res.render('modifyProfile.pug', {
         usernameDB: user[0].toObject().username,
-        passwordDB: user[0].toObject().password,
+        passwordDB: user[0].toObject().password_hash,
         firstNameDB: user[0].toObject().firstName,
         lastNameDB: user[0].toObject().lastName,
         cityOfResidenceDB: user[0].toObject().cityOfResidence,
@@ -242,15 +257,17 @@ app.get('/modifyProfile.html', function (req, res) {
 
 app.post('/modifyProfile.html', function(req, res) {
   var query = {'username': req.session.username};
-  utilisateur.findOneAndUpdate(query, {
-    password: req.body.passwordDB,
-    firstName: req.body.firstNameDB,
-    lastName: req.body.lastNameDB,
-    cityOfResidence: req.body.cityOfResidenceDB,
-    description: req.body.descriptionDB
+  crypto.pbkdf2(req.body.passwordDB, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+    utilisateur.findOneAndUpdate(query, {
+      password_hash: key.toString('base64'),
+      firstName: req.body.firstNameDB,
+      lastName: req.body.lastNameDB,
+      cityOfResidence: req.body.cityOfResidenceDB,
+      description: req.body.descriptionDB
     }, {upsert:true}, function(err, doc){
-    if (err) return res.send(500, { error: err });
-    return res.redirect('/myProfile.html');
+      if (err) return res.send(500, { error: err });
+      return res.redirect('/myProfile.html');
+    });
   });
 });
 

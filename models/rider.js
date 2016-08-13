@@ -12,7 +12,7 @@ var userSchema = new Schema({
       unique: true
     }
   },
-  password: {
+  password_hash: {
     type: String,
     required: true
   },
