@@ -422,25 +422,6 @@ app.post('/foundRiders.html', function (req, res) {
   }
 });
 
-app.use('/rideInfos.html/', function(req, res, next) {
-  console.log('RIDEINFOS.HTML')
-  console.log(req.url)
-  var rideID = req.url.substring(1);
-  trajet.findById(rideID, function(err, foundRide) {
-    console.log('COUCOU' + foundRide)
-    if (err) {
-      res.redirect('/home.html');
-    }
-    else if(foundRide == undefined) {
-      res.redirect('/home.html');
-    }
-    else {
-      req.url = null;
-      res.render('rideInfos.pug', {drives: foundRide})
-    }
-  });
-});
-
 app.use('/subscribeToRide.html/', function(req, res, next) {
   console.log(req.url)
   var rideID = req.url.substring(1);
@@ -468,6 +449,7 @@ app.use('/subscribeToRide.html/', function(req, res, next) {
       }
       else {
         var tempRiders = foundRide.participants + req.session.username;
+        console.log('TRYING TO UPDATE' + 'UPDATE VALUE: TEMPRIDERS=' + tempRiders)
         trajet.findByIdAndUpdate(rideID, tempRiders, function(err, foundRide) {
           if (err) {
             res.redirect('back');
@@ -477,6 +459,29 @@ app.use('/subscribeToRide.html/', function(req, res, next) {
       }
     }
   });
+});
+
+app.use('/rideInfos.html/', function(req, res, next) {
+  console.log('RIDEINFOS.HTML')
+  console.log(req.url)
+  var rideID = req.url.substring(1);
+  trajet.findById(rideID, function(err, foundRide) {
+    console.log('COUCOU' + foundRide)
+    if (err) {
+      res.redirect('/home.html');
+    }
+    else if(foundRide == undefined) {
+      res.redirect('/home.html');
+    }
+    else {
+      req.url = null;
+      res.render('rideInfos.pug', {drives: foundRide})
+    }
+  });
+});
+
+app.use('/', function(req, res, next) {
+  res.redirect('/home.html');
 });
 
 app.listen(3000)
