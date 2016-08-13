@@ -422,36 +422,59 @@ app.post('/foundRiders.html', function (req, res) {
   }
 });
 
-app.use('/rideInfos.html', function(req, res, next) {
+app.use('/rideInfos.html/', function(req, res, next) {
+  console.log('RIDEINFOS.HTML')
   console.log(req.url)
   var rideID = req.url.substring(1);
   trajet.findById(rideID, function(err, foundRide) {
     console.log('COUCOU' + foundRide)
     if (err) {
-      res.redirect('back');
+      res.redirect('/home.html');
     }
     else if(foundRide == undefined) {
-      res.redirect('back');
+      res.redirect('/home.html');
     }
     else {
+      req.url = null;
       res.render('rideInfos.pug', {drives: foundRide})
     }
   });
 });
 
-app.use('/subscribeToRide.html', function(req, res, next) {
+app.use('/subscribeToRide.html/', function(req, res, next) {
   console.log(req.url)
   var rideID = req.url.substring(1);
   trajet.findById(rideID, function(err, foundRide) {
-    console.log('COUCOU' + foundRide)
+    console.log('COUCOUCOUCOU' + foundRide)
     if (err) {
       res.redirect('back');
     }
     else if(foundRide == undefined) {
       res.redirect('back');
     }
+    else if(foundRide.participants == undefined) {
+      res.redirect('back');
+    }
     else {
-      res.render('rideInfos.pug', {drives: foundRide})
+      var booleen = false;
+      for(var i = 0; i < foundRide.participants.length;i++){
+        if (foundRide.participants[i] == req.session.username)
+        {
+          booleen = true;
+        }
+      }
+      if (booleen) {
+        res.redirect('/home.html', {error: 'You are already subscribed to this ride'});
+      }
+      else {
+        var tempRiders = foundRide.participants + req.session.username;
+        trajet.findByIdAndUpdate(rideID, tempRiders, function(err, foundRide) {
+          if (err) {
+            res.redirect('back');
+          }
+        });
+        res.render('subscribedRides.pug');
+      }
     }
   });
 });
