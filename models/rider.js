@@ -30,8 +30,14 @@ var userSchema = new Schema({
   description: {
     type: String
   },
+  email: {
+    type: String
+  },
   votes: {
     type: Number
+  },
+  votedFor: {
+    type: [String]
   },
   created_at: Date,
   updated_at: Date

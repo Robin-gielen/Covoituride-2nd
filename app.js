@@ -77,7 +77,7 @@ passport.use('login', new Strategy({
     // hash the password to check if its ok
     crypto.pbkdf2(req.body.password, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
       if (err) throw err;
-      var user_hash = key.toString('base64'); 
+      var user_hash = key.toString('base64');
       utilisateur.find({ username: req.body.username }, function(err, user) {
         //if there's an error with the reading of the db
 
@@ -135,6 +135,7 @@ passport.use('signup', new Strategy({
               firstName : req.body.firstName,
               lastName : req.body.lastName,
               cityOfResidence : req.body.cityOfResidence,
+              email: req.body.email,
               description : req.body.description,
             });
             // save the user
@@ -224,19 +225,20 @@ app.get('/homeLogged.html', function (req, res) {
 })
 
 app.get('/myProfile.html', function (req, res) {
-  utilisateur.find({ username: req.session.username }, function(err, user) {
-    if (err) throw err;
-    if (user[0] != undefined) {
-      res.render('myProfile.pug', {
-        usernameDB: user[0].toObject().username,
-        passwordDB: user[0].toObject().password_hash,
-        firstNameDB: user[0].toObject().firstName,
-        lastNameDB: user[0].toObject().lastName,
-        cityOfResidenceDB: user[0].toObject().cityOfResidence,
-        descriptionDB: user[0].toObject().description,
-      });
-    }
-  });
+    utilisateur.find({ username: req.session.username }, function(err, user) {
+      if (err) throw err;
+      if (user[0] != undefined) {
+        res.render('myProfile.pug', {
+          usernameDB: user[0].toObject().username,
+          passwordDB: user[0].toObject().password_hash,
+          firstNameDB: user[0].toObject().firstName,
+          lastNameDB: user[0].toObject().lastName,
+          cityOfResidenceDB: user[0].toObject().cityOfResidence,
+          emailDB: user[0].toObject().email,
+          descriptionDB: user[0].toObject().description,
+        });
+      }
+    });
 })
 
 app.get('/modifyProfile.html', function (req, res) {
@@ -249,6 +251,7 @@ app.get('/modifyProfile.html', function (req, res) {
         firstNameDB: user[0].toObject().firstName,
         lastNameDB: user[0].toObject().lastName,
         cityOfResidenceDB: user[0].toObject().cityOfResidence,
+        emailDB: user[0].toObject().email,
         descriptionDB: user[0].toObject().description,
       });
     }
@@ -338,7 +341,7 @@ app.post('/foundRides.html', function (req, res) {
     });
   }
   else if (req.body.arrivalTown && req.body.departureTown == '') {
-    trajet.find({ arrival: req.body.arrivalTown}, function(err, foundRides) {
+    trajet.find({ arrival: new RegExp(req.body.arrivalTown, "i")}, function(err, foundRides) {
       if (err)
         res.render('searchRides.pug', {error: 'No rides found'});
       else if(foundRides[0] == undefined) {
@@ -350,7 +353,7 @@ app.post('/foundRides.html', function (req, res) {
     });
   }
   else if (req.body.arrivalTown && req.body.departureTown){
-    trajet.find({departure: req.body.departureTown, arrival: req.body.arrivalTown}, function(err, foundRides) {
+    trajet.find({departure: new RegExp(req.body.departureTown, "i"), arrival: new RegExp(req.body.arrivalTown, "i")}, function(err, foundRides) {
       if (err) {
         res.render('searchRides.pug', {error: 'No rides found'});
       }
@@ -387,11 +390,9 @@ app.get('/searchRiders.html', function (req, res) {
 })
 
 app.post('/foundRiders.html', function (req, res) {
-  console.log(req.body.searchMethod);
   var temp = req.body.searchMethod;
   if (temp == 'username') {
     utilisateur.find({ username: new RegExp(req.body.searchTerm, "i")}, function(err, foundRiders) {
-      console.log('USERNAME')
       if (err) {
         res.render('searchRiders.pug', {error: 'No riders found - Please try again a bit later'});
       }
@@ -399,14 +400,12 @@ app.post('/foundRiders.html', function (req, res) {
         res.render('searchRiders.pug', {error: 'No riders found with this information'})
       }
       else {
-        console.log(foundRiders)
         res.render('foundRiders.pug', {riders: foundRiders})
       }
     });
   }
   else if (temp == 'firstName') {
     utilisateur.find({ firstName: new RegExp(req.body.searchTerm, "i")}, function(err, foundRiders) {
-      console.log('FIRSTNAME')
       if (err) {
         res.render('searchRiders.pug', {error: 'No riders found - Please try again a bit later'});
       }
@@ -414,14 +413,12 @@ app.post('/foundRiders.html', function (req, res) {
         res.render('searchRiders.pug', {error: 'No riders found with this information'})
       }
       else {
-        console.log(foundRiders)
         res.render('foundRiders.pug', {riders: foundRiders})
       }
     });
   }
   else if (temp == 'lastName') {
     utilisateur.find({ lastName: new RegExp(req.body.searchTerm, "i")}, function(err, foundRiders) {
-      console.log('LASTNAME')
       if (err) {
         res.render('searchRiders.pug', {error: 'No riders found - Please try again a bit later'});
       }
@@ -429,7 +426,6 @@ app.post('/foundRiders.html', function (req, res) {
         res.render('searchRiders.pug', {error: 'No riders found with this information'})
       }
       else {
-        console.log(foundRiders)
         res.render('foundRiders.pug', {riders: foundRiders})
       }
     });
@@ -440,10 +436,8 @@ app.post('/foundRiders.html', function (req, res) {
 });
 
 app.use('/subscribeToRide.html/', function(req, res, next) {
-  console.log(req.url)
   var rideID = req.url.substring(1);
   trajet.findById(rideID, function(err, foundRide) {
-    console.log('COUCOUCOUCOU' + foundRide)
     if (err) {
       res.redirect('/home.html');
     }
@@ -455,8 +449,6 @@ app.use('/subscribeToRide.html/', function(req, res, next) {
     }
     else {
       var booleen = false;
-      console.log(foundRide.participants.length);
-
       if (foundRide.participants == undefined) {
         res.redirect('/home.html');
       }
@@ -468,22 +460,18 @@ app.use('/subscribeToRide.html/', function(req, res, next) {
           }
         }
         if (booleen) {
-          console.log('GOINGHOME')
           res.redirect('/home.html');
         }
         else {
           var tempRiders = foundRide.participants;
           tempRiders.push(req.session.username);
-          console.log('DU GROS CACA' + foundRide.seatsAvailable);
           var tempSeats = foundRide.seatsAvailable;
           var tempSeats = tempSeats - 1;
-          console.log('TRYING TO UPDATE' + 'UPDATE VALUE: TEMPRIDERS=' + tempRiders)
           trajet.findByIdAndUpdate(rideID, {participants: tempRiders, seatsAvailable: tempSeats}, function(err, foundRide) {
             if (err) {
               res.redirect('/home.html');
             }
           });
-          console.log(foundRide.seatsAvailable);
           res.redirect('/subscribedRides.html');
         }
       }
@@ -492,11 +480,8 @@ app.use('/subscribeToRide.html/', function(req, res, next) {
 });
 
 app.use('/rideInfos.html/', function(req, res, next) {
-  console.log('RIDEINFOS.HTML')
-  console.log(req.url)
   var rideID = req.url.substring(1);
   trajet.findById(rideID, function(err, foundRide) {
-    console.log('COUCOU' + foundRide)
     if (err) {
       res.redirect('/home.html');
     }
@@ -507,6 +492,104 @@ app.use('/rideInfos.html/', function(req, res, next) {
       req.url = null;
       res.render('rideInfos.pug', {drives: foundRide})
     }
+  });
+});
+
+app.use('/riderUpvote.html/', function(req, res, next) {
+  var riderUsername = req.url.substring(1);
+  utilisateur.find(riderUsername, function(err, foundRider) {
+    if (err) {
+      res.redirect('/home.html');
+    }
+    else if(foundRider == undefined) {
+      res.redirect('/home.html');
+    }
+    else if(foundRider.votedFor == undefined) {
+      var tempVoters = [];
+      tempVoters.push(req.session.username);
+      var tempVotes = 1;
+      var query = {'username': riderUsername};
+      utilisateur.findOneAndUpdate(query, {votedFor: tempVoters, votes: tempVotes}, function(err, foundRider) {
+        if (err) {
+          res.redirect('/home.html');
+        }
+      });
+      //res.redirect('/searchRiders.html');
+    }
+    else {
+      var booleen = false;
+      for(var i = 0; i < foundRider.votedFor.length;i++){
+        if (foundRider.votedFor[i] == req.session.username)
+        {
+          booleen = true;
+        }
+      }
+      if (booleen) {
+        res.redirect('/home.html');
+      }
+      else {
+        var tempVoters = foundRider.votedFor;
+        tempVoters.push(req.session.username);
+        var tempVotes = foundRider.votes;
+        var tempVotes = tempVotes + 1;
+        var query = {'username': riderUsername};
+        trajet.findOneAndUpdate(query, {votedFor: tempVoters, votes: tempVotes}, function(err, foundRider) {
+          if (err) {
+            res.redirect('/home.html');
+          }
+        });
+      }
+    }
+    res.redirect('/home.html');
+  });
+});
+
+app.use('/riderDownvote.html/', function(req, res, next) {
+  var riderUsername = req.url.substring(1);
+  utilisateur.find(riderUsername, function(err, foundRider) {
+    if (err) {
+      res.redirect('/home.html');
+    }
+    else if(foundRider == undefined) {
+      res.redirect('/home.html');
+    }
+    else if(foundRider.votedFor == undefined) {
+      var tempVoters = [];
+      tempVoters.push(req.session.username);
+      var tempVotes = - 1;
+      var query = {'username': riderUsername};
+      utilisateur.findOneAndUpdate(query, {votedFor: tempVoters, votes: tempVotes}, function(err, foundRider) {
+        if (err) {
+          res.redirect('/home.html');
+        }
+      });
+      //res.redirect('/searchRiders.html');
+    }
+    else {
+      var booleen = false;
+      for(var i = 0; i < foundRider.votedFor.length;i++){
+        if (foundRider.votedFor[i] == req.session.username)
+        {
+          booleen = true;
+        }
+      }
+      if (booleen) {
+        res.redirect('/home.html');
+      }
+      else {
+        var tempVoters = foundRider.votedFor;
+        tempVoters.push(req.session.username);
+        var tempVotes = foundRider.votes;
+        var tempVotes = tempVotes - 1;
+        var query = {'username': riderUsername};
+        trajet.findOneAndUpdate(query, {votedFor: tempVoters, votes: tempVotes}, function(err, foundRider) {
+          if (err) {
+            res.redirect('/home.html');
+          }
+        });
+      }
+    }
+    res.redirect('/home.html');
   });
 });
 

@@ -38,7 +38,7 @@ block content
                   th City of Residence
                   th Description
                   th Votes
-                  th Subscribed Since
+                  th Contact Infos
                   th Upvote
                   th Downvote
             tbody(style='color:white; text-decoration:none;')
@@ -50,6 +50,6 @@ block content
                   td #{rider.cityOfResidence}
                   td #{rider.description}
                   td #{rider.votes}
-                  td #{rider.created_at}
-                  td #{rider.Upvote}
-                  td #{rider.Downvote}
+                  td #{rider.email}
+                  td #[a(href='/riderUpvote.html/'+rider.username) Upvote]
+                  td #[a(href='/riderDownvote.html/'+rider.username) Downvote]
