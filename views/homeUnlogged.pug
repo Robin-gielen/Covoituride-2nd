@@ -10,25 +10,10 @@ block content
       a.a3(href='/signup.html') SignUp
       a.a4(href='/login.html') Login
     .leftBloc
-      form(action='/quickSearchRides.html', method='post')
-        p Quick search by departure town :
-        input(style='width:80%; margin-left:5px; margin-bottom:3px;', type='text', name='search')
-        input(style='margin-left:5px;', type='submit', value='Search rides')
-      a(href='/myProfile.html', style='color:white; text-decoration:none;')
-        p My profile
-      a(href='/proposeARide.html', style='color:white; text-decoration:none;')
-        p Propose A Ride
-      a(href='/proposedRides.html', style='color:white; text-decoration:none;')
-        p My proposed rides
-      a(href='/subscribedRides.html', style='color:white; text-decoration:none;')
-        p My subscribed rides
-      a(href='/searchRides.html', style='color:white; text-decoration:none;')
-        p Search for rides
-      a(href='/searchRiders.html', style='color:white; text-decoration:none;')
-        p Search for riders
       a(href='/aboutCovoituride.html', style='color:white; text-decoration:none;')
         p About covoituride
     .bodyBloc
       h1 Bienvenue sur covoituride !
+        p Veuillez vous connecter pour commencer à utiliser le site.
       if error
         div= error

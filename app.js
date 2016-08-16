@@ -77,11 +77,14 @@ passport.use('login', new Strategy({
     // hash the password to check if its ok
     crypto.pbkdf2(req.body.password, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
       if (err) throw err;
-      var user_hash = key.toString('base64');
       utilisateur.find({ username: req.body.username }, function(err, user) {
         //if there's an error with the reading of the db
-
-        var db_hash = user[0].toObject().password_hash;
+        var user_hash;
+        var db_hash;
+        if(user[0] != undefined) {
+          user_hash = key.toString('base64');
+          db_hash = user[0].toObject().password_hash;
+        }
         if (err)
           return done(err);
         // if no user with that username is Found
@@ -228,6 +231,13 @@ app.get('/myProfile.html', function (req, res) {
     utilisateur.find({ username: req.session.username }, function(err, user) {
       if (err) throw err;
       if (user[0] != undefined) {
+        var tempVote;
+        if (user[0].votes == undefined) {
+          tempVote = 0;
+        }
+        else {
+          var tempVote = user[0].toObject.votes;
+        }
         res.render('myProfile.pug', {
           usernameDB: user[0].toObject().username,
           passwordDB: user[0].toObject().password_hash,
@@ -235,6 +245,7 @@ app.get('/myProfile.html', function (req, res) {
           lastNameDB: user[0].toObject().lastName,
           cityOfResidenceDB: user[0].toObject().cityOfResidence,
           emailDB: user[0].toObject().email,
+          votesDB: user[0].toObject().votes,
           descriptionDB: user[0].toObject().description,
         });
       }
@@ -383,6 +394,9 @@ app.post('/quickSearchRides.html', function (req, res) {
       }
     });
   }
+  else {
+    res.redirect('/home.html')
+  }
 })
 
 app.get('/searchRiders.html', function (req, res) {
@@ -445,6 +459,9 @@ app.use('/subscribeToRide.html/', function(req, res, next) {
       res.redirect('/home.html');
     }
     else if(foundRide.participants == undefined) {
+      res.redirect('/home.html');
+    }
+    else if (foundRide.driverUsername == req.session.username) {
       res.redirect('/home.html');
     }
     else {
