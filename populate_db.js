@@ -1,16 +1,9 @@
-//Module dependencies
-var express = require('express');
-
-var logger = require('express-logger');
-
 //Mongodb dependencies
 var MongoClient = require('mongodb')
 , assert = require('assert')
 , mongoose = require('mongoose')
-, url = 'mongodb://localhost:27017/db'
-, bodyParser = require('body-parser');
+, url = 'mongodb://localhost:27017/db';
 
-var cookieParser = require('cookie-parser');
 var crypto = require('crypto');
 
 mongoose.Promise = require('bluebird');
@@ -19,14 +12,6 @@ mongoose.Promise = require('bluebird');
 var utilisateur = require('./models/rider');
 var trajet = require('./models/ride');
 
-//Passport dependencies
-var passport = require('passport');
-var Strategy = require('passport-local');
-var session = require('express-session');
-var flash = require('req-flash');
-var connectFlash = require('connect-flash');
-
- var app = express()
 
 //Lauching mongodb connection
 mongoose.connect(url);
@@ -34,9 +19,10 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   console.log('CONNECTED');
+  populate();
 });
 
-populate() {
+function populate() {
   //User 1
   crypto.pbkdf2('robin', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
@@ -259,25 +245,20 @@ populate() {
   });
 
   console.log('mid');
-}
 
-
-
-
-app.use(function (req, res, next) {
   // create the ride 1
   var newRide = new trajet({
   // set the user's local credentials
-    departure : Louvain,
+    departure : 'Louvain',
     pickUpPlace : 'Gare des Bus',
-    midRideTakeOff : No,
-    arrival : Namur,
+    midRideTakeOff : 'No',
+    arrival : 'Namur',
     date : '28.08.16',
     carModel : 'Ford Fiesta',
     maxSeats : 4,
     price : 12,
-    stops : No,
-    driverUsername : robin,
+    stops : 'No',
+    driverUsername : 'robin',
   });
   // save the user
   newRide.save(function(err) {
@@ -286,22 +267,20 @@ app.use(function (req, res, next) {
     }
     return done(null, newUser);
   });
-})
 
-app.use(function (req, res, next) {
   // create the ride 2
   var newRide = new trajet({
   // set the user's local credentials
-    departure : Namur,
+    departure : 'Namur',
     pickUpPlace : 'Gare des Trains',
-    midRideTakeOff : Yes,
-    arrival : Bruxelles,
+    midRideTakeOff : 'Yes',
+    arrival : 'Bruxelles',
     date : '25.08.16',
-    carModel : Volkswagen,
+    carModel : 'Volkswagen',
     maxSeats : 2,
     price : 6,
-    stops : Yes,
-    driverUsername : emilio,
+    stops : 'Yes',
+    driverUsername : 'emilio',
   });
   // save the user
   newRide.save(function(err) {
@@ -310,22 +289,20 @@ app.use(function (req, res, next) {
     }
     return done(null, newUser);
   });
-})
 
-app.use(function (req, res, next) {
   // create the ride 3
   var newRide = new trajet({
   // set the user's local credentials
-    departure : Bruxelles,
+    departure : 'Bruxelles',
     pickUpPlace : 'Rue de l etoile',
-    midRideTakeOff : No,
-    arrival : Sart-Bernard,
+    midRideTakeOff : 'No',
+    arrival : 'Sart-Bernard',
     date : '30.08.16',
-    carModel : BMW,
+    carModel : 'BMW',
     maxSeats : 5,
     price : 16,
-    stops : No,
-    driverUsername : arnaud,
+    stops : 'No',
+    driverUsername : 'arnaud',
   });
   // save the user
   newRide.save(function(err) {
@@ -334,22 +311,20 @@ app.use(function (req, res, next) {
     }
     return done(null, newUser);
   });
-})
 
-app.use(function (req, res, next) {
   // create the ride 4
   var newRide = new trajet({
   // set the user's local credentials
-    departure : Sart-Bernard,
+    departure : 'Sart-Bernard',
     pickUpPlace : 'Ecole communale',
-    midRideTakeOff : Yes,
-    arrival : Louvain,
+    midRideTakeOff : 'Yes',
+    arrival : 'Louvain',
     date : '27.08.16',
     carModel : 'Toyota corola',
     maxSeats : 3,
     price : 9,
-    stops : Yes,
-    driverUsername : julien,
+    stops : 'Yes',
+    driverUsername : 'julien',
   });
   // save the user
   newRide.save(function(err) {
@@ -358,22 +333,20 @@ app.use(function (req, res, next) {
     }
     return done(null, newUser);
   });
-})
 
-app.use(function (req, res, next) {
   // create the ride 5
   var newRide = new trajet({
   // set the user's local credentials
-    departure : Mons,
+    departure : 'Mons',
     pickUpPlace : 'Gare des Bus, place du centre',
-    midRideTakeOff : No,
-    arrival : Liege,
+    midRideTakeOff : 'No',
+    arrival : 'Liege',
     date : '28.08.16',
     carModel : 'Renaud Megan',
     maxSeats : 4,
     price : 12,
-    stops : No,
-    driverUsername : robin,
+    stops : 'No',
+    driverUsername : 'robin',
   });
   // save the user
   newRide.save(function(err) {
@@ -382,22 +355,20 @@ app.use(function (req, res, next) {
     }
     return done(null, newUser);
   });
-})
 
-app.use(function (req, res, next) {
   // create the ride 6
   var newRide = new trajet({
   // set the user's local credentials
-    departure : Mons,
+    departure : 'Mons',
     pickUpPlace : 'Rue du general',
-    midRideTakeOff : No,
-    arrival : Sart-Bernard,
+    midRideTakeOff : 'No',
+    arrival : 'Sart-Bernard',
     date : '28.08.16',
-    carModel : Porsche,
+    carModel : 'Porsche',
     maxSeats : 1,
     price : 18,
-    stops : No,
-    driverUsername : ben,
+    stops : 'No',
+    driverUsername : 'ben',
   });
   // save the user
   newRide.save(function(err) {
@@ -406,22 +377,20 @@ app.use(function (req, res, next) {
     }
     return done(null, newUser);
   });
-})
 
-app.use(function (req, res, next) {
   // create the ride 7
   var newRide = new trajet({
   // set the user's local credentials
-    departure : Charlerois,
+    departure : 'Charlerois',
     pickUpPlace : 'Rue de la paix',
-    midRideTakeOff : No,
-    arrival : Namur,
+    midRideTakeOff : 'No',
+    arrival : 'Namur',
     date : '02.09.16',
     carModel : 'Renaud Clio',
     maxSeats : 6,
     price : 23,
-    stops : No,
-    driverUsername : axel,
+    stops : 'No',
+    driverUsername : 'axel',
   });
   // save the user
   newRide.save(function(err) {
@@ -430,22 +399,20 @@ app.use(function (req, res, next) {
     }
     return done(null, newUser);
   });
-})
 
-app.use(function (req, res, next) {
   // create the ride 8
   var newRide = new trajet({
   // set the user's local credentials
-    departure : Namur,
+    departure : 'Namur',
     pickUpPlace : 'Gare des Bus',
-    midRideTakeOff : No,
-    arrival : Charlerois,
+    midRideTakeOff : 'No',
+    arrival : 'Charlerois',
     date : '06.09.16',
     carModel : 'Audi A4',
     maxSeats : 4,
     price : 0,
-    stops : No,
-    driverUsername : ben,
+    stops : 'No',
+    driverUsername : 'ben',
   });
   // save the user
   newRide.save(function(err) {
@@ -454,22 +421,20 @@ app.use(function (req, res, next) {
     }
     return done(null, newUser);
   });
-})
 
-app.use(function (req, res, next) {
   // create the ride 9
   var newRide = new trajet({
   // set the user's local credentials
-    departure : Louvain,
+    departure : 'Louvain',
     pickUpPlace : 'Parking Charlemagne',
-    midRideTakeOff : Yes,
-    arrival : Mons,
+    midRideTakeOff : 'Yes',
+    arrival : 'Mons',
     date : '20.08.16',
     carModel : 'Ford Fiesta',
     maxSeats : 3,
     price : 12,
-    stops : No,
-    driverUsername : robin,
+    stops : 'No',
+    driverUsername : 'robin',
   });
   // save the user
   newRide.save(function(err) {
@@ -479,6 +444,10 @@ app.use(function (req, res, next) {
     return done(null, newUser);
   });
   console.log('over');
-})
+}
+
+
+
+
 
 db.close();

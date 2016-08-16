@@ -60,6 +60,8 @@ userSchema.pre('save', function(next) {
   // get the current date
   var currentDate = new Date();
 
+  this.votes = 0;
+  
   // change the updated_at field to current date
   this.updated_at = currentDate;
 

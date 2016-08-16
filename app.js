@@ -146,6 +146,9 @@ passport.use('signup', new Strategy({
               if (err){
                 throw err;
               }
+              console.log(newUser);
+              req.session.username = req.body.username;
+              console.log(req.session.username )
               return done(null, newUser);
             });
           });
@@ -232,11 +235,11 @@ app.get('/myProfile.html', function (req, res) {
       if (err) throw err;
       if (user[0] != undefined) {
         var tempVote;
-        if (user[0].votes == undefined) {
+        if (user[0].toObject().votes == undefined) {
           tempVote = 0;
         }
         else {
-          var tempVote = user[0].toObject.votes;
+          tempVote = user[0].toObject().votes;
         }
         res.render('myProfile.pug', {
           usernameDB: user[0].toObject().username,
@@ -244,7 +247,7 @@ app.get('/myProfile.html', function (req, res) {
           lastNameDB: user[0].toObject().lastName,
           cityOfResidenceDB: user[0].toObject().cityOfResidence,
           emailDB: user[0].toObject().email,
-          votesDB: user[0].toObject().votes,
+          votesDB: user[0].toObject().tempVote,
           descriptionDB: user[0].toObject().description,
         });
       }
@@ -270,9 +273,7 @@ app.get('/modifyProfile.html', function (req, res) {
 
 app.post('/modifyProfile.html', function(req, res) {
   var query = {'username': req.session.username};
-  crypto.pbkdf2(req.body.passwordDB, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     utilisateur.findOneAndUpdate(query, {
-      password_hash: key.toString('base64'),
       firstName: req.body.firstNameDB,
       lastName: req.body.lastNameDB,
       cityOfResidence: req.body.cityOfResidenceDB,
@@ -281,7 +282,6 @@ app.post('/modifyProfile.html', function(req, res) {
       if (err) return res.send(500, { error: err });
       return res.redirect('/myProfile.html');
     });
-  });
 });
 
 app.get('/proposeARide.html', function (req, res) {
@@ -402,10 +402,11 @@ app.get('/searchRiders.html', function (req, res) {
   res.render('searchRiders.pug')
 })
 
-app.post('/foundRiders.html', function (req, res) {
-  var temp = req.body.searchMethod;
-  if (temp == 'username') {
-    utilisateur.find({ username: new RegExp(req.body.searchTerm, "i")}, function(err, foundRiders) {
+function search_for_user(req, res, method, search_term) {
+  console.log(method)
+  console.log(search_term)
+  if (method == 'username') {
+    utilisateur.find({ username: new RegExp(search_term, "i")}, function(err, foundRiders) {
       if (err) {
         res.render('searchRiders.pug', {error: 'No riders found - Please try again a bit later'});
       }
@@ -417,21 +418,8 @@ app.post('/foundRiders.html', function (req, res) {
       }
     });
   }
-  else if (temp == 'firstName') {
-    utilisateur.find({ firstName: new RegExp(req.body.searchTerm, "i")}, function(err, foundRiders) {
-      if (err) {
-        res.render('searchRiders.pug', {error: 'No riders found - Please try again a bit later'});
-      }
-      else if(foundRiders[0] == undefined) {
-        res.render('searchRiders.pug', {error: 'No riders found with this information'})
-      }
-      else {
-        res.render('foundRiders.pug', {riders: foundRiders})
-      }
-    });
-  }
-  else if (temp == 'lastName') {
-    utilisateur.find({ lastName: new RegExp(req.body.searchTerm, "i")}, function(err, foundRiders) {
+  else if (method == 'firstName') {
+    utilisateur.find({ firstName: new RegExp(search_term, "i")}, function(err, foundRiders) {
       if (err) {
         res.render('searchRiders.pug', {error: 'No riders found - Please try again a bit later'});
       }
@@ -444,8 +432,26 @@ app.post('/foundRiders.html', function (req, res) {
     });
   }
   else {
-    res.render('searchRiders.pug', {error: 'No riders found for those infos'})
+    utilisateur.find({ lastName: new RegExp(search_term, "i")}, function(err, foundRiders) {
+      if (err) {
+        res.render('searchRiders.pug', {error: 'No riders found - Please try again a bit later'});
+      }
+      else if(foundRiders[0] == undefined) {
+        res.render('searchRiders.pug', {error: 'No riders found with this information'})
+      }
+      else {
+        res.render('foundRiders.pug', {riders: foundRiders})
+      }
+    });
   }
+}
+
+app.post('/foundRiders.html', function (req, res) {
+  var method = req.body.searchMethod;
+  var search_term = req.body.searchTerm;
+  req.session.lastMethod = method;
+  req.session.searchTerm = search_term;
+  search_for_user(req, res, method, search_term);
 });
 
 app.use('/subscribeToRide.html/', function(req, res, next) {
@@ -513,100 +519,72 @@ app.use('/rideInfos.html/', function(req, res, next) {
 
 app.use('/riderUpvote.html/', function(req, res, next) {
   var riderUsername = req.url.substring(1);
-  utilisateur.find(riderUsername, function(err, foundRider) {
+  var query = {'username': riderUsername}
+  utilisateur.find(query, function(err, foundRider) {
     if (err) {
       res.redirect('/home.html');
     }
-    else if(foundRider == undefined) {
+    else if(foundRider[0] == undefined) {
       res.redirect('/home.html');
     }
-    else if(foundRider.votedFor == undefined) {
-      var tempVoters = [];
-      tempVoters.push(req.session.username);
-      var tempVotes = 1;
-      var query = {'username': riderUsername};
-      utilisateur.findOneAndUpdate(query, {votedFor: tempVoters, votes: tempVotes}, function(err, foundRider) {
-        if (err) {
-          res.redirect('/home.html');
-        }
-      });
-      //res.redirect('/searchRiders.html');
-    }
     else {
-      var booleen = false;
-      for(var i = 0; i < foundRider.votedFor.length;i++){
-        if (foundRider.votedFor[i] == req.session.username)
-        {
-          booleen = true;
-        }
+      var tempVoters = [];
+      var tempVote = 0;
+      if(foundRider[0].toObject().votedFor) {
+        tempVoters = foundRider[0].toObject().votedFor;
+        tempVote = foundRider[0].toObject().votes;
       }
-      if (booleen) {
-        res.redirect('/home.html');
+      if(tempVoters.indexOf(req.session.username) > -1) {
+        search_for_user(req, res, req.session.lastMethod, req.session.searchTerm);
       }
       else {
-        var tempVoters = foundRider.votedFor;
         tempVoters.push(req.session.username);
-        var tempVotes = foundRider.votes;
-        var tempVotes = tempVotes + 1;
+        tempVote +=1;
         var query = {'username': riderUsername};
-        trajet.findOneAndUpdate(query, {votedFor: tempVoters, votes: tempVotes}, function(err, foundRider) {
+        utilisateur.findOneAndUpdate(query, {votedFor: tempVoters, votes: tempVote}, function(err, foundRider) {
           if (err) {
             res.redirect('/home.html');
           }
         });
+        search_for_user(req, res, req.session.lastMethod, req.session.searchTerm);
       }
     }
-    res.redirect('/home.html');
-  });
+  })
 });
 
 app.use('/riderDownvote.html/', function(req, res, next) {
   var riderUsername = req.url.substring(1);
-  utilisateur.find(riderUsername, function(err, foundRider) {
+  var query = {'username': riderUsername}
+  utilisateur.find(query, function(err, foundRider) {
     if (err) {
       res.redirect('/home.html');
     }
-    else if(foundRider == undefined) {
+    else if(foundRider[0] == undefined) {
       res.redirect('/home.html');
     }
-    else if(foundRider.votedFor == undefined) {
-      var tempVoters = [];
-      tempVoters.push(req.session.username);
-      var tempVotes = - 1;
-      var query = {'username': riderUsername};
-      utilisateur.findOneAndUpdate(query, {votedFor: tempVoters, votes: tempVotes}, function(err, foundRider) {
-        if (err) {
-          res.redirect('/home.html');
-        }
-      });
-      //res.redirect('/searchRiders.html');
-    }
     else {
-      var booleen = false;
-      for(var i = 0; i < foundRider.votedFor.length;i++){
-        if (foundRider.votedFor[i] == req.session.username)
-        {
-          booleen = true;
-        }
+      var tempVoters = [];
+      var tempVote = 0;
+      if(foundRider[0].toObject().votedFor) {
+        tempVoters = foundRider[0].toObject().votedFor;
+        tempVote = foundRider[0].toObject().votes;
       }
-      if (booleen) {
-        res.redirect('/home.html');
+      if(tempVoters.indexOf(req.session.username) > -1) {
+        search_for_user(req, res, req.session.lastMethod, req.session.searchTerm);
       }
       else {
-        var tempVoters = foundRider.votedFor;
         tempVoters.push(req.session.username);
-        var tempVotes = foundRider.votes;
-        var tempVotes = tempVotes - 1;
+        tempVote -=1;
         var query = {'username': riderUsername};
-        trajet.findOneAndUpdate(query, {votedFor: tempVoters, votes: tempVotes}, function(err, foundRider) {
+        utilisateur.findOneAndUpdate(query, {votedFor: tempVoters, votes: tempVote}, function(err, foundRider) {
           if (err) {
             res.redirect('/home.html');
           }
         });
+        search_for_user(req, res, req.session.lastMethod, req.session.searchTerm);
       }
     }
-    res.redirect('/home.html');
-  });
+  })
 });
 
 app.use('/', function(req, res, next) {
