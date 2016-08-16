@@ -36,10 +36,9 @@ db.once('open', function() {
   console.log('CONNECTED');
 });
 
-//CURRENTLY NOT WORKING
-app.use(function (req, res, next) {
+populate() {
   //User 1
-  crypto.pbkdf2(robin, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+  crypto.pbkdf2('robin', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
     var newUser = new utilisateur({
       // set the user's local credentials
@@ -60,9 +59,7 @@ app.use(function (req, res, next) {
       return done(null, newUser);
     });
   });
-})
 
-app.use(function (req, res, next) {
   //User 2
   crypto.pbkdf2('julien', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
@@ -84,19 +81,17 @@ app.use(function (req, res, next) {
       return done(null, newUser);
     });
   });
-})
 
-app.use(function (req, res, next) {
   //User 3
-  crypto.pbkdf2(arnaud, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+  crypto.pbkdf2('arnaud', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
     var newUser = new utilisateur({
       // set the user's local credentials
-      username : arnaud,
+      username : 'arnaud',
       password_hash : key.toString('base64'),
-      firstName : Arnaud,
-      lastName : Gielen,
-      cityOfResidence : Sart-Bernard,
+      firstName : 'Arnaud',
+      lastName : 'Gielen',
+      cityOfResidence : 'Sart-Bernard',
       email: 'arnaud@email.com',
       description : 'Etudiant Sart-Bernard',
     });
@@ -108,18 +103,16 @@ app.use(function (req, res, next) {
       return done(null, newUser);
     });
   });
-})
 
-app.use(function (req, res, next) {
   //User 4
-  crypto.pbkdf2(louis, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+  crypto.pbkdf2('louis', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
     var newUser = new utilisateur({
       // set the user's local credentials
-      username : louis,
+      username : 'louis',
       password_hash : key.toString('base64'),
-      firstName : Louis,
-      lastName : Dassy,
+      firstName : 'Louis',
+      lastName : 'Dassy',
       cityOfResidence : 'Louvain la Neuve',
       email: 'louis@email.com',
       description : 'Etudiant Louvain',
@@ -132,18 +125,16 @@ app.use(function (req, res, next) {
       return done(null, newUser);
     });
   });
-})
 
-app.use(function (req, res, next) {
   //User 5
-  crypto.pbkdf2(Ben, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+  crypto.pbkdf2('Ben', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
     var newUser = new utilisateur({
       // set the user's local credentials
-      username : ben,
+      username : 'ben',
       password_hash : key.toString('base64'),
-      firstName : Benjamin,
-      lastName : Joiret,
+      firstName : 'Benjamin',
+      lastName : 'Joiret',
       cityOfResidence : 'Villers-la-Ville',
       email: 'ben@email.com',
       description : 'Etudiant Villers-la-Ville',
@@ -156,19 +147,17 @@ app.use(function (req, res, next) {
       return done(null, newUser);
     });
   });
-})
 
-app.use(function (req, res, next) {
   //User 6
-  crypto.pbkdf2(axel, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+  crypto.pbkdf2('axel', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
     var newUser = new utilisateur({
       // set the user's local credentials
-      username : axel,
+      username : 'axel',
       password_hash : key.toString('base64'),
-      firstName : Axel,
-      lastName : Czervic,
-      cityOfResidence : Mons,
+      firstName : 'Axel',
+      lastName : 'Czervic',
+      cityOfResidence : 'Mons',
       email: 'axel@email.com',
       description : 'Etudiant Mons',
     });
@@ -180,19 +169,17 @@ app.use(function (req, res, next) {
       return done(null, newUser);
     });
   });
-})
 
-app.use(function (req, res, next) {
   //User 7
-  crypto.pbkdf2(emilio, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+  crypto.pbkdf2('emilio', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
     var newUser = new utilisateur({
       // set the user's local credentials
-      username : emilio,
+      username : 'emilio',
       password_hash : key.toString('base64'),
-      firstName : Emilio,
-      lastName : Gamba,
-      cityOfResidence : Bruxelles,
+      firstName : 'Emilio',
+      lastName : 'Gamba',
+      cityOfResidence : 'Bruxelles',
       email: 'emilio@email.com',
       description : 'Etudiant Bruxelles',
     });
@@ -204,18 +191,16 @@ app.use(function (req, res, next) {
       return done(null, newUser);
     });
   });
-})
 
-app.use(function (req, res, next) {
   //User 8
-  crypto.pbkdf2(felix, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+  crypto.pbkdf2('felix', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
     var newUser = new utilisateur({
       // set the user's local credentials
-      username : felix,
+      username : 'felix',
       password_hash : key.toString('base64'),
-      firstName : Felix,
-      lastName : Pierson,
+      firstName : 'Felix',
+      lastName : 'Pierson',
       cityOfResidence : 'Louvain-la-Neuve',
       email: 'felix@email.com',
       description : 'Etudiant Louvain-la-Neuve',
@@ -228,19 +213,17 @@ app.use(function (req, res, next) {
       return done(null, newUser);
     });
   });
-})
 
-app.use(function (req, res, next) {
   //User 9
-  crypto.pbkdf2(mathieu, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+  crypto.pbkdf2('mathieu', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
     var newUser = new utilisateur({
       // set the user's local credentials
-      username : mathieu,
+      username : 'mathieu',
       password_hash : key.toString('base64'),
-      firstName : Mathieu,
-      lastName : Monnart,
-      cityOfResidence : Liege,
+      firstName : 'Mathieu',
+      lastName : 'Monnart',
+      cityOfResidence : 'Liege',
       email: 'mathieu@email.com',
       description : 'Etudiant Liege',
     });
@@ -252,19 +235,17 @@ app.use(function (req, res, next) {
       return done(null, newUser);
     });
   });
-})
 
-app.use(function (req, res, next) {
   //User 10
-  crypto.pbkdf2(simon, 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
+  crypto.pbkdf2('simon', 'RGFYaWL/rDfkbfRoN/ZUog==', 1000, 512, 'sha512', function (err, key) {
     // create the user
     var newUser = new utilisateur({
       // set the user's local credentials
-      username : simon,
+      username : 'simon',
       password_hash : key.toString('base64'),
-      firstName : Simon,
-      lastName : Monteyne,
-      cityOfResidence : Charlerois,
+      firstName : 'Simon',
+      lastName : 'Monteyne',
+      cityOfResidence : 'Charlerois',
       email: 'simon@email.com',
       description : 'Etudiant Charlerois',
     });
@@ -276,8 +257,10 @@ app.use(function (req, res, next) {
       return done(null, newUser);
     });
   });
+
   console.log('mid');
-})
+}
+
 
 
 

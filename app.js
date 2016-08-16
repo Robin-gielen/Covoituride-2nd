@@ -240,7 +240,6 @@ app.get('/myProfile.html', function (req, res) {
         }
         res.render('myProfile.pug', {
           usernameDB: user[0].toObject().username,
-          passwordDB: user[0].toObject().password_hash,
           firstNameDB: user[0].toObject().firstName,
           lastNameDB: user[0].toObject().lastName,
           cityOfResidenceDB: user[0].toObject().cityOfResidence,
